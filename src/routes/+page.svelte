@@ -17,7 +17,7 @@
       <input id="replay-link" placeholder="replay.pokemonshowdown.com/xyz" bind:value={replayUrl} />
       <button type="submit">Analyze</button>
   </form>
-  <p>{result}</p>
+  <p>{result[0]}</p>
 </main>
 
 <style>
