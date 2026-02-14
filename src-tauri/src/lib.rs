@@ -8,9 +8,8 @@ async fn analyze(replay_url: &str) -> Result<String, String> {
     let lines = fetch::fetch_replay(replay_url)
         .await
         .unwrap_or_default();
-    analysis::analysis(lines)
-        .await
-        .ok_or("Couldn't do something".to_string())
+    analysis::analysis(lines);
+    Ok("ok".to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
