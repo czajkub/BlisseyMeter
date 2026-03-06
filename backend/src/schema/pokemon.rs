@@ -1,4 +1,4 @@
-struct Pokemon {
+pub struct Pokemon {
     name: String,
     forme: String,
     ability: String,
@@ -9,4 +9,9 @@ struct Pokemon {
     maxhp: u8,
     status: String,
     
+}
+
+pub struct PokeSpecies {
+    pub species: String,
+    pub gender: Option<char>,
 }

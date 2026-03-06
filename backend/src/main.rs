@@ -1,6 +1,7 @@
 mod fetch;
 mod analyze;
 mod handlers;
+mod schema;
 
 use fetch::fetch_replay;
 use analyze::analyze;
