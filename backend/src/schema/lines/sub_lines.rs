@@ -1,5 +1,4 @@
 use crate::schema::lines::line_types::SubLineType;
-use crate::schema::state::PokeSpecies;
 
 pub struct SubLine {
     pub line_type: SubLineType,
@@ -28,7 +27,7 @@ pub struct SubLine {
     pub tera_type: Option<String>,
 
     // Mega fields
-    pub species: Option<PokeSpecies>,
+    pub species: Option<String>,
     pub mega_stone: Option<String>,
 }
 
@@ -40,12 +39,13 @@ fn extract_pokemon(player_and_nick: &str) -> (String, String) {
     (player, pokemon_nickname)
 }
 
-fn extract_pokemon_species(pokemon_string: &str) -> PokeSpecies {
-    let mut split = pokemon_string.split(",");
-    let species = split.next().unwrap_or("").to_string();
-    let gender = split.next().unwrap_or("").trim().to_string().chars().next();
-
-    PokeSpecies { species, gender }
+fn extract_species(pokemon_string: &str) -> String {
+    pokemon_string
+        .split(",")
+        .next()
+        .unwrap_or("")
+        .trim()
+        .to_string()
 }
 
 fn extract_hp(hp_split: &str) -> (u8, u8) {
@@ -78,7 +78,8 @@ impl SubLine {
     // -damage: hit pokemon (p+n) | new hp
     pub fn from_damage(line: &str) -> Self {
         let mut split = line.split("|");
-        split.next(); // skip line type marker
+        split.next();
+        split.next(); // skip "-damage"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
         let (new_hp, max_hp) = extract_hp(split.next().unwrap_or_default());
 
@@ -94,6 +95,7 @@ impl SubLine {
     pub fn from_heal(line: &str) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-heal"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
         let (new_hp, max_hp) = extract_hp(split.next().unwrap_or_default());
 
@@ -109,6 +111,7 @@ impl SubLine {
     pub fn from_move_effectiveness(line: &str, line_type: SubLineType) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip line type marker
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
 
         let mut sub = Self::new_empty(line_type);
@@ -121,9 +124,15 @@ impl SubLine {
     pub fn from_stat_change(line: &str, is_boost: bool) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-boost" or "-unboost"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
-        let stat = split.next().unwrap_or_default().to_string();
-        let amount = split.next().unwrap_or("0").parse::<u8>().unwrap_or(0);
+        let stat = split.next().unwrap_or_default().trim().to_string();
+        let amount = split
+            .next()
+            .unwrap_or("0")
+            .trim()
+            .parse::<u8>()
+            .unwrap_or(0);
 
         let line_type = if is_boost {
             SubLineType::Boost
@@ -143,10 +152,11 @@ impl SubLine {
     pub fn from_enditem(line: &str) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-enditem"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
-        let item = split.next().unwrap_or_default().to_string();
-        let from = split.next().map(|s| s.to_string());
-        let of = split.next().map(|s| s.to_string());
+        let item = split.next().unwrap_or_default().trim().to_string();
+        let from = split.next().map(|s| s.trim().to_string());
+        let of = split.next().map(|s| s.trim().to_string());
 
         let mut sub = Self::new_empty(SubLineType::EndItem);
         sub.player = Some(player);
@@ -161,8 +171,9 @@ impl SubLine {
     pub fn from_activate(line: &str) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-activate"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
-        let ability = split.next().unwrap_or_default().to_string();
+        let ability = split.next().unwrap_or_default().trim().to_string();
 
         let mut sub = Self::new_empty(SubLineType::Activate);
         sub.player = Some(player);
@@ -175,8 +186,9 @@ impl SubLine {
     pub fn from_terastallize(line: &str) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-terastallize"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
-        let tera_type = split.next().unwrap_or_default().to_string();
+        let tera_type = split.next().unwrap_or_default().trim().to_string();
 
         let mut sub = Self::new_empty(SubLineType::Terastallize);
         sub.player = Some(player);
@@ -189,9 +201,10 @@ impl SubLine {
     pub fn from_mega(line: &str) -> Self {
         let mut split = line.split("|");
         split.next();
+        split.next(); // skip "-mega"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
-        let species = extract_pokemon_species(split.next().unwrap_or_default());
-        let mega_stone = split.next().unwrap_or_default().to_string();
+        let species = extract_species(split.next().unwrap_or_default());
+        let mega_stone = split.next().unwrap_or_default().trim().to_string();
 
         let mut sub = Self::new_empty(SubLineType::Mega);
         sub.player = Some(player);

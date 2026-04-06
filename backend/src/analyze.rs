@@ -1,6 +1,7 @@
 use crate::schema::lines::line_types::SubLineType;
 use crate::schema::lines::main_lines::MainLine;
 use crate::schema::lines::sub_lines::SubLine;
+use crate::schema::state::GameState;
 
 pub enum Line {
     Main(MainLine),
@@ -52,6 +53,8 @@ fn parse_line(line: &str) -> Line {
 }
 
 pub async fn analyze(lines: Vec<String>) {
+    let mut game_state = GameState::default();
+
     for line in &lines {
         let parsed = parse_line(line);
 

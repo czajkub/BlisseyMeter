@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub enum MainLineType {
     Switch,
     Move,
@@ -5,6 +6,7 @@ pub enum MainLineType {
     DetailsChange,
 }
 
+#[derive(Debug)]
 pub enum SubLineType {
     // HP changes
     Damage,
@@ -31,6 +33,7 @@ pub enum SubLineType {
     Mega,
 }
 
+#[derive(Debug)]
 pub enum InfoLineType {
     Gen,
     GameType,

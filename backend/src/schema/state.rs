@@ -1,9 +1,3 @@
-#[derive(Debug, Clone)]
-pub struct PokeSpecies {
-    pub species: String,
-    pub gender: Option<char>,
-}
-
 #[derive(Debug, Clone, Default)]
 pub struct GameState {
     pub turn: u32,
@@ -22,7 +16,7 @@ pub struct PlayerState {
 #[derive(Debug, Clone)]
 pub struct PokemonState {
     pub nickname: String,
-    pub species: PokeSpecies,
+    pub species: String,
     pub current_hp: u8,
     pub max_hp: u8,
     pub stat_boosts: StatBoosts,
@@ -147,7 +141,7 @@ impl PlayerState {
 }
 
 impl PokemonState {
-    pub fn new(nickname: String, species: PokeSpecies, current_hp: u8, max_hp: u8) -> Self {
+    pub fn new(nickname: String, species: String, current_hp: u8, max_hp: u8) -> Self {
         PokemonState {
             nickname,
             species,
