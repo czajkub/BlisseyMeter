@@ -1,5 +1,5 @@
 use std::str::Split;
 
-pub fn handle_join(line: Split<'_, char>) -> String {
+pub fn handle_switch(line: Split<'_, char>) -> String {
     "ok".to_string()
 }

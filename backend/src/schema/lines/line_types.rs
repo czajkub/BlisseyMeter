@@ -1,41 +1,52 @@
-enum MainLineType {
-    SWITCH,
-    MOVE,
-    FAINT,
-    DETAILSCHANGE,
+pub enum MainLineType {
+    Switch,
+    Move,
+    Faint,
+    DetailsChange,
 }
 
-enum SubLineType {
-    HPCHANGE,
-    MOVEINFO,
-    STATCHANGE,
-    FORMECHANGE,
-    ABILITY_ACTIVATION,
-    ITEM_ACTIVATION,
+pub enum SubLineType {
+    // HP changes
+    Damage,
+    Heal,
+
+    // Move effectiveness
+    Crit,
+    Resisted,
+    SuperEffective,
+    Immune,
+
+    // Stat changes
+    Boost,
+    Unboost,
+
+    // Item
+    EndItem,
+
+    // Ability
+    Activate,
+
+    // Forme changes
+    Terastallize,
+    Mega,
 }
 
-enum InfoLineType {
-    GEN,
-    GAMETYPE,
-    TIER,
-    RULE,
+pub enum InfoLineType {
+    Gen,
+    GameType,
+    Tier,
+    Rule,
 
-    START,
-    UPKEEP,
-    TIME,
-    TURN,
+    Start,
+    Upkeep,
+    Time,
+    Turn,
 
-    WIN,
-    JOIN,
-    CHAT,
+    Win,
+    Join,
+    Chat,
 
-    PLAYER,
-    TEAMSIZE,
-    POKE,
-}
-
-enum LineType {
-    MainLineType,
-    SubLineType,
-    InfoLineType,
+    Player,
+    TeamSize,
+    Poke,
 }
