@@ -3,25 +3,37 @@ mod analyze;
 mod handlers;
 mod schema;
 
+use axum::{
+    routing::{get, post},
+    Router,
+    response::IntoResponse,
+    http::{StatusCode, header}
+};
+use lambda_http::{run, Error};
+
+
 use fetch::fetch_replay;
 use analyze::analyze;
 
-#[macro_use] extern crate rocket;
-
-#[get("/")]
-fn index() -> &'static str {
+async fn index() -> &'static str {
     "Hello, world!"
 }
 
-#[post("/analyze", data = "<replay_uri>")]
-async fn analyze_replay(replay_uri: String) -> String {
-    let lines = fetch_replay(&replay_uri).await.unwrap_or_default();
+async fn analyze_replay(body: String) -> impl IntoResponse {
+    let lines = fetch_replay(&body).await.unwrap_or_default();
     analyze(lines).await;
-    format!("Analysis complete")
-
+    
+    (
+        StatusCode::OK,
+        [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "https://czajkub.pl")],
+        "Analysis complete"
+    )
 }
 
-#[launch]
-fn rocket() -> _ {
-    rocket::build().mount("/", routes![index, analyze_replay])
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let app = Router::new()
+        .route("/", get(index))
+        .route("/analyze", post(analyze_replay));
+    run(app).await
 }
