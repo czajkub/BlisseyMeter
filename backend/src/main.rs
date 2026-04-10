@@ -3,6 +3,10 @@ mod analyze;
 mod handlers;
 mod schema;
 
+use std::env;
+use std::sync::OnceLock;
+use dotenv::dotenv;
+
 use axum::{
     routing::{get, post},
     Router,
@@ -11,12 +15,20 @@ use axum::{
 };
 use lambda_http::{run, Error};
 
-
 use fetch::fetch_replay;
 use analyze::analyze;
 
+static API_URL: OnceLock<String> = OnceLock::new();
+
+fn get_api_url() -> &'static String {
+    API_URL.get_or_init(|| {
+        dotenv().ok();
+        env::var("API_URL").expect("API_URL must be set")
+    })
+}
+
 async fn index() -> &'static str {
-    "Hello, world!"
+    "Hello, world!\n"
 }
 
 async fn analyze_replay(body: String) -> impl IntoResponse {
@@ -25,7 +37,7 @@ async fn analyze_replay(body: String) -> impl IntoResponse {
     
     (
         StatusCode::OK,
-        [(header::ACCESS_CONTROL_ALLOW_ORIGIN, "https://czajkub.pl")],
+        [(header::ACCESS_CONTROL_ALLOW_ORIGIN, get_api_url().as_str())],
         "Analysis complete"
     )
 }
