@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+
 #[derive(Debug, Clone, Default)]
 pub struct GameState {
     pub turn: u32,
@@ -10,7 +13,7 @@ pub struct GameState {
 pub struct PlayerState {
     pub name: String,
     pub active_pokemon: Option<String>, // nickname of active pokemon
-    pub team: Vec<PokemonState>,
+    pub team: HashMap<String, PokemonState>,
 }
 
 #[derive(Debug, Clone)]
@@ -119,26 +122,6 @@ impl GameState {
     }
 }
 
-impl PlayerState {
-    pub fn get_pokemon(&self, nickname: &str) -> Option<&PokemonState> {
-        self.team.iter().find(|p| p.nickname == nickname)
-    }
-
-    pub fn get_pokemon_mut(&mut self, nickname: &str) -> Option<&mut PokemonState> {
-        self.team.iter_mut().find(|p| p.nickname == nickname)
-    }
-
-    pub fn get_active_pokemon(&self) -> Option<&PokemonState> {
-        self.active_pokemon
-            .as_ref()
-            .and_then(|nick| self.get_pokemon(nick))
-    }
-
-    pub fn get_active_pokemon_mut(&mut self) -> Option<&mut PokemonState> {
-        let nick = self.active_pokemon.clone()?;
-        self.get_pokemon_mut(&nick)
-    }
-}
 
 impl PokemonState {
     pub fn new(nickname: String, species: String, current_hp: u8, max_hp: u8) -> Self {
