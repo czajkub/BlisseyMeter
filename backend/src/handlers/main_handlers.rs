@@ -5,6 +5,12 @@ use crate::schema::state::GameState;
 pub mod handle_switch;
 pub use handle_switch::handle_switch;
 
+pub mod handle_faint;
+pub use handle_faint::handle_faint;
+
+pub mod handle_detailschange;
+pub use handle_detailschange::handle_detailschange;
+
 pub fn handle_main_line(state: &mut GameState, line: &MainLine) {
     match line.line_type {
         MainLineType::Switch => handle_switch(state, line),
