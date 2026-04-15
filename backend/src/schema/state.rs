@@ -7,6 +7,8 @@ pub struct GameState {
     pub p1: PlayerState,
     pub p2: PlayerState,
     pub field: FieldState,
+    // pub p1_luck: Vec<LuckState>,
+    // pub p2_luck: Vec<LuckState>,
 }
 
 #[derive(Debug, Clone, Default)]

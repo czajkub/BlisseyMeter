@@ -1,5 +1,7 @@
 use crate::schema::lines::line_types::MainLineType;
+use crate::schema::lines::sub_lines::SubLine;
 
+#[derive(Debug, Clone)]
 pub struct MainLine {
     pub line_type: MainLineType,
 
@@ -17,6 +19,8 @@ pub struct MainLine {
     pub target_player: Option<String>,
     pub target_pokemon_nickname: Option<String>,
     // DetailsChange uses `species` for changed_form (reused)
+
+    pub sublines: Vec<SubLine>,
 }
 
 // player + nick - so like p1a: N95; p2a: Pecharunt
@@ -63,6 +67,7 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            sublines: Vec::new(),
         }
     }
 
@@ -85,6 +90,7 @@ impl MainLine {
             move_name: Some(move_name),
             target_player: Some(target_player),
             target_pokemon_nickname: Some(target_pokemon_nickname),
+            sublines: Vec::new(),
         }
     }
 
@@ -104,6 +110,7 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            sublines: Vec::new(),
         }
     }
 
@@ -124,6 +131,7 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            sublines: Vec::new(),
         }
     }
 }

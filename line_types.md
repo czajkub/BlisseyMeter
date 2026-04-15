@@ -50,3 +50,16 @@ c: nick | message
 player:    `p1`/`p2` | nick | avatar
 teamsize:  `p1`/`p2` | number (1-6)
 poke:      `p1`/`p2` | pokemon 
+
+
+What counts as luck in replays (general checklist)
+- |-crit| critical hits
+- |-miss| / |-immune| from accuracy/evasion interactions (incl. low-acc moves hitting)
+- Secondary effects (|-status|, stat drops/boosts from move effects, flinches, etc.)
+- Status RNG turns (full para, sleep turns, freeze thaw, confusion self-hit, multi-turn wake/thaw timing)
+- Damage rolls (high/low roll ranges that change KO thresholds)
+- Move-hit-count RNG (multi-hit moves: 2–5 hits, Triple Axel chains, etc.)
+- Ability/item proc chances (Flame Body burn, Static para, Quick Claw, etc.)
+- Speed ties and tie-break RNG (if same speed and both act)
+
+Turn 11: Dragapult Shadow Ball gets SpD drop on Primarina (|-unboost|spd|1) — 20% secondary, favors p1. 

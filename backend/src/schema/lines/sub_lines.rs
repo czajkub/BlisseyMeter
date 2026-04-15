@@ -1,5 +1,6 @@
 use crate::schema::lines::line_types::SubLineType;
 
+#[derive(Debug, Clone)]
 pub struct SubLine {
     pub line_type: SubLineType,
 

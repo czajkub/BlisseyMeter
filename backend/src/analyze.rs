@@ -3,6 +3,7 @@ use crate::schema::lines::main_lines::MainLine;
 use crate::schema::lines::sub_lines::SubLine;
 use crate::schema::state::GameState;
 
+#[derive(Debug, Clone)]
 pub enum Line {
     Main(MainLine),
     Sub(SubLine),
@@ -50,6 +51,29 @@ fn parse_line(line: &str) -> Line {
         // Unknown/unhandled line types
         _ => Line::Unknown,
     }
+}
+
+fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
+    let mut parsed_lines = Vec::new();
+    let mut last_main_line: Option<MainLine> = None;
+    for line in lines {
+        let parsed = parse_line(&line);
+        match parsed {
+            Line::Main(main_line) => {
+                last_main_line = Some(main_line.clone());
+                parsed_lines.push(Line::Main(main_line));
+            }
+            Line::Sub(sub_line) => {
+                if let Some(last_main_line) = last_main_line.as_mut() {
+                    last_main_line.sublines.push(sub_line);
+                }
+            }
+            Line::Unknown => {
+                // Skip unknown lines or log them
+            }
+        }
+    }
+    parsed_lines
 }
 
 pub async fn analyze(lines: Vec<String>) {

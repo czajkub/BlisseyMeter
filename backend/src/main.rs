@@ -2,6 +2,7 @@ mod fetch;
 mod analyze;
 mod handlers;
 mod schema;
+mod constants;
 
 use std::env;
 use std::sync::OnceLock;
