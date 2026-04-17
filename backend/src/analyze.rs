@@ -1,7 +1,9 @@
+use crate::handlers::main_handlers::handle_main_line;
 use crate::schema::lines::line_types::SubLineType;
 use crate::schema::lines::main_lines::MainLine;
 use crate::schema::lines::sub_lines::SubLine;
 use crate::schema::state::GameState;
+use crate::handlers::main_handlers::handle_move::handle_move;
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -55,17 +57,23 @@ fn parse_line(line: &str) -> Line {
 
 fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
     let mut parsed_lines = Vec::new();
-    let mut last_main_line: Option<MainLine> = None;
+    let mut last_main_line_idx: Option<usize> = None;
+
     for line in lines {
         let parsed = parse_line(&line);
         match parsed {
             Line::Main(main_line) => {
-                last_main_line = Some(main_line.clone());
+                last_main_line_idx = Some(parsed_lines.len());
                 parsed_lines.push(Line::Main(main_line));
             }
             Line::Sub(sub_line) => {
-                if let Some(last_main_line) = last_main_line.as_mut() {
-                    last_main_line.sublines.push(sub_line);
+                if let Some(idx) = last_main_line_idx {
+                    if let Line::Main(last_main_line) = &mut parsed_lines[idx] {
+                        last_main_line.sublines.push(sub_line);
+                    }
+                } else {
+                    // If we encounter a subline before any mainline, just push it (or ignore)
+                    parsed_lines.push(Line::Sub(sub_line));
                 }
             }
             Line::Unknown => {
@@ -76,16 +84,14 @@ fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
     parsed_lines
 }
 
-pub async fn analyze(lines: Vec<String>) {
+pub async fn analyze(lines: Vec<String>) -> GameState {
     let mut game_state = GameState::default();
+    let game_lines = parse_game_lines(lines);
 
-    for line in &lines {
-        let parsed = parse_line(line);
-
-        match parsed {
+    for line in game_lines {
+        match line {
             Line::Main(main_line) => {
-                // Handle main line
-                // TODO: process main line
+                handle_main_line(&mut game_state, &main_line);
             }
             Line::Sub(sub_line) => {
                 // Handle sub line
@@ -96,4 +102,6 @@ pub async fn analyze(lines: Vec<String>) {
             }
         }
     }
+
+    game_state
 }
