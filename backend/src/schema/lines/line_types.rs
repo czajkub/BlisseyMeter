@@ -13,10 +13,14 @@ pub enum SubLineType {
     Heal,
 
     // Move effectiveness
-    Crit,
     Resisted,
     SuperEffective,
     Immune,
+
+    // Luck factors
+    Crit,    
+    Miss,
+    Status,
 
     // Stat changes
     Boost,

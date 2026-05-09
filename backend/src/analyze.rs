@@ -28,8 +28,12 @@ fn parse_line(line: &str) -> Line {
         "-damage" => Line::Sub(SubLine::from_damage(line)),
         "-heal" => Line::Sub(SubLine::from_heal(line)),
 
-        // Sub lines - Move effectiveness
+        // Sub lines - Possible luck factors
+        "-status" => Line::Sub(SubLine::from_status(line)),
+        "-miss" => Line::Sub(SubLine::from_miss(line)),
         "-crit" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Crit)),
+
+        // Sub lines - Move effectiveness
         "-resisted" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Resisted)),
         "-supereffective" => {
             Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::SuperEffective))

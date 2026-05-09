@@ -32,6 +32,20 @@ pub enum Status {
     Sleep,
 }
 
+impl Status {
+    pub fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "brn" => Some(Status::Burn),
+            "frz" => Some(Status::Freeze),
+            "par" => Some(Status::Paralysis),
+            "psn" => Some(Status::Poison),
+            "tox" => Some(Status::Toxic),
+            "slp" => Some(Status::Sleep),
+            _ => None,
+        }
+    }
+}
+
 impl PokemonState {
     pub fn new(nickname: String, species: String, current_hp: u8, max_hp: u8) -> Self {
         PokemonState {

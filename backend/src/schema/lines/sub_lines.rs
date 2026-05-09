@@ -1,4 +1,5 @@
 use crate::schema::lines::line_types::SubLineType;
+use crate::schema::state::Status;
 
 #[derive(Debug, Clone)]
 pub struct SubLine {
@@ -30,6 +31,13 @@ pub struct SubLine {
     // Mega fields
     pub species: Option<String>,
     pub mega_stone: Option<String>,
+
+    // Status effect fields
+    pub status: Option<Status>,
+    
+    // Fields related to moves
+    pub target_player: Option<String>,
+    pub target_pokemon_nickname: Option<String>,
 }
 
 // Helper to extract player + nickname
@@ -73,6 +81,9 @@ impl SubLine {
             tera_type: None,
             species: None,
             mega_stone: None,
+            status: None,
+            target_player: None,
+            target_pokemon_nickname: None,
         }
     }
 
@@ -212,6 +223,35 @@ impl SubLine {
         sub.pokemon_nickname = Some(pokemon_nickname);
         sub.species = Some(species);
         sub.mega_stone = Some(mega_stone);
+        sub
+    }
+
+    pub fn from_miss(line: &str) -> Self {
+        let mut split = line.split("|");
+        split.next();
+        split.next(); // skip "-miss"
+        let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
+        let (target_player, target_pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
+
+        let mut sub = Self::new_empty(SubLineType::Miss);
+        sub.player = Some(player);
+        sub.pokemon_nickname = Some(pokemon_nickname);
+        sub.target_player = Some(target_player);
+        sub.target_pokemon_nickname = Some(target_pokemon_nickname);
+        sub
+    }
+
+    pub fn from_status(line: &str) -> Self {
+        let mut split = line.split("|");
+        split.next();
+        split.next(); // skip "-status"
+        let (player, affected_pokemon) = extract_pokemon(split.next().unwrap_or_default());
+        let status = Status::from_str(split.next().unwrap_or_default().trim());
+
+        let mut sub = Self::new_empty(SubLineType::Status);
+        sub.player = Some(player);
+        sub.pokemon_nickname = Some(affected_pokemon);
+        sub.status = status;
         sub
     }
 }
