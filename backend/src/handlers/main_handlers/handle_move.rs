@@ -11,6 +11,32 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
 
     let mut luck_events: Vec<LuckEvent> = Vec::new();
 
+    let move_accuracy = move_data
+        .map(|m| m.accuracy.unwrap_or(100))
+        .unwrap_or(100);
+
+    let secondary_effect_chance = move_data
+        .map(|m| m.secondary_effect.unwrap_or(0))
+        .unwrap_or(0);
+
+    let has_unboost_subline = line.sublines.iter().any(|subline| subline.line_type == SubLineType::Unboost);
+
+
+    if  secondary_effect_chance > 0 && secondary_effect_chance < 100 {
+        println!("Secondary effect chance: {}, unboost subline: {}", secondary_effect_chance, has_unboost_subline);
+        if !has_unboost_subline {
+            luck_events.push(LuckEvent {
+                turn: state.turn,
+                pokemon: line.pokemon_nickname.clone(),
+                category: LuckCategory::SecondaryEffect,
+                score: SECONDARY_EFFECT_WEIGHT * (secondary_effect_chance as f64 / 100.0),
+                description: format!("Didn't activate secondary effect of {}.", current_move.unwrap_or(&"".to_string())),
+                source_move: current_move.cloned(),
+                is_beneficial: false,
+            });
+        }
+    }
+
     for subline in &line.sublines {
         match subline.line_type {
             SubLineType::Crit => {
@@ -43,9 +69,6 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     line.pokemon_nickname,
                     line.species.clone().unwrap_or_default(),
                 );
-                let move_accuracy = move_data
-                    .map(|m| m.accuracy.unwrap_or(100))
-                    .unwrap_or(100);
                 let miss_chance = 100.0 - (move_accuracy as f64);
                 luck_events.push(LuckEvent {
                     turn: state.turn,
@@ -55,6 +78,26 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     description: format!("Move accuracy: {}", move_accuracy),
                     source_move: current_move.cloned(),
                     is_beneficial: false,
+                });
+            }
+            SubLineType::Unboost => {
+                println!(
+                    "Unboost found! Move: {:?} for player {:?}",
+                    line.move_name, line.player
+                );
+                let pokemon_with_nick = format!(
+                    "{} ({})",
+                    line.pokemon_nickname,
+                    line.species.clone().unwrap_or_default(),
+                );
+                luck_events.push(LuckEvent {
+                    turn: state.turn,
+                    pokemon: pokemon_with_nick,
+                    category: LuckCategory::SecondaryEffect,
+                    score: SECONDARY_EFFECT_WEIGHT * ((100.0 - secondary_effect_chance as f64) / 100.0),
+                    description: format!("Move secondary effect chance: {}", secondary_effect_chance),
+                    source_move: current_move.cloned(),
+                    is_beneficial: true,
                 });
             }
             _ => {}
