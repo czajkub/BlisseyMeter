@@ -72,8 +72,8 @@ async fn main() -> Result<(), Error> {
         run(app).await?;
     } else {
         let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
-        let addr = format!("localhost:{}", port);
-        println!("Running locally on http://{}", addr);
+        let addr = format!("localhost:{port}");
+        println!("Running locally on http://{addr}");
         let listener = TcpListener::bind(addr).await.unwrap();
         axum::serve(listener, app).await.unwrap();
     }

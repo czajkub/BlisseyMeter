@@ -7,30 +7,28 @@ use crate::schema::state::{GameState, LuckCategory, LuckEvent};
 pub fn handle_move(state: &mut GameState, line: &MainLine) {
     let current_move = line.move_name.as_ref();
     let moves_map = moves();
-    let move_data = moves_map.get(current_move.unwrap_or(&"".to_string()));
+    let move_data = moves_map.get(current_move.unwrap_or(&String::new()));
 
     let mut luck_events: Vec<LuckEvent> = Vec::new();
 
     let move_accuracy = move_data
-        .map(|m| m.accuracy.unwrap_or(100))
-        .unwrap_or(100);
+        .map_or(100, |m| m.accuracy.unwrap_or(100));
 
     let secondary_effect_chance = move_data
-        .map(|m| m.secondary_effect.unwrap_or(0))
-        .unwrap_or(0);
+        .map_or(0, |m| m.secondary_effect.unwrap_or(0));
 
     let has_unboost_subline = line.sublines.iter().any(|subline| subline.line_type == SubLineType::Unboost);
 
 
     if  secondary_effect_chance > 0 && secondary_effect_chance < 100 {
-        println!("Secondary effect chance: {}, unboost subline: {}", secondary_effect_chance, has_unboost_subline);
+        println!("Secondary effect chance: {secondary_effect_chance}, unboost subline: {has_unboost_subline}");
         if !has_unboost_subline {
             luck_events.push(LuckEvent {
                 turn: state.turn,
                 pokemon: line.pokemon_nickname.clone(),
                 category: LuckCategory::SecondaryEffect,
                 score: SECONDARY_EFFECT_WEIGHT * (secondary_effect_chance as f64 / 100.0),
-                description: format!("Didn't activate secondary effect of {}.", current_move.unwrap_or(&"".to_string())),
+                description: format!("Didn't activate secondary effect of {}", current_move.unwrap_or(&String::new())),
                 source_move: current_move.cloned(),
                 is_beneficial: false,
             });
@@ -54,7 +52,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick,
                     category: LuckCategory::CriticalHit,
                     score: CRIT_WEIGHT,
-                    description: "".to_string(),
+                    description: String::new(),
                     source_move: current_move.cloned(),
                     is_beneficial: true,
                 });
@@ -75,7 +73,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick,
                     category: LuckCategory::AccuracyMiss,
                     score: MISS_WEIGHT * (1.0 - (miss_chance / 100.0)),
-                    description: format!("Move accuracy: {}", move_accuracy),
+                    description: format!("Move accuracy: {move_accuracy}"),
                     source_move: current_move.cloned(),
                     is_beneficial: false,
                 });
@@ -95,7 +93,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick,
                     category: LuckCategory::SecondaryEffect,
                     score: SECONDARY_EFFECT_WEIGHT * ((100.0 - secondary_effect_chance as f64) / 100.0),
-                    description: format!("Move secondary effect chance: {}", secondary_effect_chance),
+                    description: format!("Move secondary effect chance: {secondary_effect_chance}"),
                     source_move: current_move.cloned(),
                     is_beneficial: true,
                 });

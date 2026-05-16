@@ -25,7 +25,7 @@ pub struct MainLine {
 
 // player + nick - so like p1a: N95; p2a: Pecharunt
 fn extract_pokemon(player_and_nick: &str) -> (String, String) {
-    let mut split = player_and_nick.split(":");
+    let mut split = player_and_nick.split(':');
     let player = split.next().unwrap_or("").to_string();
     let pokemon_nickname = split.next().unwrap_or("").trim().to_string();
     (player, pokemon_nickname)
@@ -34,7 +34,7 @@ fn extract_pokemon(player_and_nick: &str) -> (String, String) {
 fn extract_species(pokemon_string: &str) -> String {
     // Species string may have ", M" or ", F" suffix for gender - just take species
     pokemon_string
-        .split(",")
+        .split(',')
         .next()
         .unwrap_or("")
         .trim()
@@ -42,7 +42,7 @@ fn extract_species(pokemon_string: &str) -> String {
 }
 
 fn extract_hp(hp_split: &str) -> (u8, u8) {
-    let mut split = hp_split.split("/");
+    let mut split = hp_split.split('/');
     let current_hp = split.next().unwrap_or("0").parse::<u8>().unwrap_or(0);
     let max_hp = split.next().unwrap_or("100").parse::<u8>().unwrap_or(100);
     (current_hp, max_hp)
@@ -50,7 +50,7 @@ fn extract_hp(hp_split: &str) -> (u8, u8) {
 
 impl MainLine {
     pub fn from_switch(line: &str) -> Self {
-        let mut split = line.split("|");
+        let mut split = line.split('|');
         split.next();
         split.next(); // skip "switch"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
@@ -72,7 +72,7 @@ impl MainLine {
     }
 
     pub fn from_move(line: &str) -> Self {
-        let mut split = line.split("|");
+        let mut split = line.split('|');
         split.next();
         split.next(); // skip "move"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
@@ -95,7 +95,7 @@ impl MainLine {
     }
 
     pub fn from_faint(line: &str) -> Self {
-        let mut split = line.split("|");
+        let mut split = line.split('|');
         split.next();
         split.next(); // skip "faint"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
@@ -115,7 +115,7 @@ impl MainLine {
     }
 
     pub fn from_detailschange(line: &str) -> Self {
-        let mut split = line.split("|");
+        let mut split = line.split('|');
         split.next();
         split.next(); // skip "detailschange"
         let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());

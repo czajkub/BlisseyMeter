@@ -3,7 +3,6 @@ use crate::schema::lines::line_types::SubLineType;
 use crate::schema::lines::main_lines::MainLine;
 use crate::schema::lines::sub_lines::SubLine;
 use crate::schema::state::GameState;
-use crate::handlers::main_handlers::handle_move::handle_move;
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -97,7 +96,7 @@ pub async fn analyze(lines: Vec<String>) -> GameState {
             Line::Main(main_line) => {
                 handle_main_line(&mut game_state, &main_line);
             }
-            Line::Sub(sub_line) => {
+            Line::Sub(_sub_line) => {
                 // Handle sub line
                 // TODO: process sub line
             }
