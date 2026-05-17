@@ -18,21 +18,37 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
     let move_accuracy = move_data.map_or(100, |m| m.get_accuracy());
     let secondary_effect_chance = move_data.and_then(|m| m.secondary_effect).unwrap_or(0);
 
-    let has_unboost_subline = line
-        .sublines
-        .iter()
-        .any(|s| s.line_type == SubLineType::Unboost);
+    let mut has_miss_subline = false;
+    let mut has_unboost_subline = false;
+    let mut has_status_subline = false;
+
+    for subline in &line.sublines {
+        match subline.line_type {
+            SubLineType::Miss => has_miss_subline = true,
+            SubLineType::Unboost => has_unboost_subline = true,
+            SubLineType::Status => has_status_subline = true,
+            _ => {},
+        }
+    }
+
+    let secondary_effect_happened = has_unboost_subline || has_status_subline; // Add more later if needed like volatile statuses
 
     let mut luck_events = Vec::new();
-    let pokemon_with_nick = format!(
-        "{} ({})",
-        line.pokemon_nickname,
-        line.species.as_deref().unwrap_or_default()
-    );
+    
+    let species = player_state
+        .team
+        .get(&line.pokemon_nickname)
+        .map(|p| p.species.as_str())
+        .unwrap_or("");
 
-    if secondary_effect_chance > 0 && secondary_effect_chance < 100 {
-        println!("Secondary effect chance: {secondary_effect_chance}, unboost subline: {has_unboost_subline}");
-        if !has_unboost_subline {
+    let pokemon_with_nick = if species.is_empty() || line.pokemon_nickname == species {
+        line.pokemon_nickname.clone()
+    } else {
+        format!("{} ({})", line.pokemon_nickname, species)
+    };
+
+    if !has_miss_subline && secondary_effect_chance > 0 && secondary_effect_chance < 100 {
+        if !secondary_effect_happened {
             luck_events.push(LuckEvent {
                 turn: current_turn,
                 pokemon: pokemon_with_nick.clone(),
@@ -72,11 +88,11 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     is_beneficial: false,
                 });
             }
-            SubLineType::Unboost => {
+            SubLineType::Unboost | SubLineType::Status => {
                 if secondary_effect_chance == 100 || secondary_effect_chance == 0 {
                     continue;
                 }
-                println!("Unboost found! Move: {:?} for player {:?}", line.move_name, line.player);
+                println!("Secondary effect proc found! Move: {:?} for player {:?}", line.move_name, line.player);
                 luck_events.push(LuckEvent {
                     turn: current_turn,
                     pokemon: pokemon_with_nick.clone(),
