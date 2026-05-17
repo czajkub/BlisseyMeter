@@ -1,5 +1,5 @@
-use crate::handlers::main_handlers::handle_main_line;
-use crate::schema::lines::line_types::SubLineType;
+use crate::schema::lines::info_lines::InfoLine;
+use crate::schema::lines::line_types::{InfoLineType, MainLineType, SubLineType};
 use crate::schema::lines::main_lines::MainLine;
 use crate::schema::lines::sub_lines::SubLine;
 use crate::schema::state::GameState;
@@ -8,7 +8,7 @@ use crate::schema::state::GameState;
 pub enum Line {
     Main(MainLine),
     Sub(SubLine),
-    // Info(InfoLine), // TODO: implement later
+    Info(InfoLine),
     Unknown,
 }
 
@@ -22,6 +22,9 @@ fn parse_line(line: &str) -> Line {
         "move" => Line::Main(MainLine::from_move(line)),
         "faint" => Line::Main(MainLine::from_faint(line)),
         "detailschange" | "-formechange" => Line::Main(MainLine::from_detailschange(line)),
+
+        // Info lines
+        "turn" => Line::Info(InfoLine::from_turn(line)),
 
         // Sub lines - HP changes
         "-damage" => Line::Sub(SubLine::from_damage(line)),
@@ -79,6 +82,9 @@ fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
                     parsed_lines.push(Line::Sub(sub_line));
                 }
             }
+            Line::Info(info_line) => {
+                parsed_lines.push(Line::Info(info_line));
+            }
             Line::Unknown => {
                 // Skip unknown lines or log them
             }
@@ -94,11 +100,18 @@ pub async fn analyze(lines: Vec<String>) -> GameState {
     for line in game_lines {
         match line {
             Line::Main(main_line) => {
-                handle_main_line(&mut game_state, &main_line);
+                crate::handlers::main_handlers::handle_main_line(&mut game_state, &main_line);
             }
             Line::Sub(_sub_line) => {
                 // Handle sub line
                 // TODO: process sub line
+            }
+            Line::Info(info_line) => {
+                if info_line.line_type == InfoLineType::Turn {
+                    game_state.turn = info_line.turn.unwrap_or(game_state.turn);
+                } else {
+                    crate::handlers::info_handlers::handle_info_line(&mut game_state, &info_line);
+                }
             }
             Line::Unknown => {
                 // Skip unknown lines or log them

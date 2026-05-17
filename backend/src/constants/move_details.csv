@@ -8,7 +8,7 @@ Acid Downpour;Poison;0;0;0;1;Poison type Z-Move.;0
 Acid Spray;Poison;Special;40;100;20;Sharply lowers opponent's Special Defense.;100
 Acrobatics;Flying;Physical;55;100;15;Stronger when the user does not have a held item.;0
 Acupressure;Normal;Status;0;0;30;Sharply raises a random stat.;0
-Aerial Ace;Flying;Physical;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Aerial Ace;Flying;Physical;60;999;20;Ignores Accuracy and Evasiveness.;0
 Aeroblast;Flying;Special;100;95;5;High critical hit ratio.;0
 After You;Normal;Status;0;0;15;Gives target priority in the next turn.;0
 Agility;Psychic;Status;0;0;30;Sharply raises user's Speed.;0
@@ -36,7 +36,7 @@ Astonish;Ghost;Physical;30;100;15;May cause flinching.;30
 Astral Barrage;Ghost;Special;120;100;5;The user attacks by sending a frightful amount of small ghosts at opposing Pokémon.;0
 Attack Order;Bug;Physical;90;100;15;High critical hit ratio.;0
 Attract;Normal;Status;0;100;15;If opponent is the opposite gender, it's less likely to attack.;0
-Aura Sphere;Fighting;Special;80;∞;20;Ignores Accuracy and Evasiveness.;0
+Aura Sphere;Fighting;Special;80;999;20;Ignores Accuracy and Evasiveness.;0
 Aura Wheel;Electric;Physical;110;100;10;Changes type based on Morpeko's Mode.;100
 Aurora Beam;Ice;Special;65;100;20;May lower opponent's Attack.;10
 Aurora Veil;Ice;Status;0;0;20;Halves damage from Physical and Special attacks for five turns.;0
@@ -46,7 +46,7 @@ Axe Kick;Fighting;Physical;120;90;10;May confuse opponent. If it misses, the use
 Baby-Doll Eyes;Fairy;Status;0;100;30;Always goes first. Lowers the target's attack.;0
 Baddy Bad;Dark;Special;90;100;15;Reduces damage from Physical attacks.;0
 Baneful Bunker;Poison;Status;0;0;10;Protects the user and poisons opponent on contact.;0
-Barb Barrage;Poison;Physical;60;100;10;May poison opponent; inflicts double damage if the target is already poisoned.;0
+Barb Barrage;Poison;Physical;60;100;10;"May poison opponent; inflicts double damage if the target is already poisoned.";0
 Barrage;Normal;Physical;15;85;20;Hits 2-5 times in one turn.;0
 Barrier;Psychic;Status;0;0;20;Sharply raises user's Defense.;0
 Baton Pass;Normal;Status;0;0;40;User switches out and gives stat changes to the incoming Pokémon.;0
@@ -98,7 +98,7 @@ Bulldoze;Ground;Physical;60;100;20;Lowers opponent's Speed.;100
 Bullet Punch;Steel;Physical;40;100;30;User attacks first.;0
 Bullet Seed;Grass;Physical;25;100;30;Hits 2-5 times in one turn.;0
 Burn Up;Fire;Special;130;100;5;To inflict massive damage, the user burns itself out. After using this move, the user will no longer be Fire type.;0
-Burning Bulwark;Fire;Status;0;∞;10;;0
+Burning Bulwark;Fire;Status;0;999;10;;0
 Burning Jealousy;Fire;Special;70;100;5;Hits all opponents, and burns any that have had their stats boosted.;0
 Buzzy Buzz;Electric;Special;90;100;15;Paralyzes the opponent.;100
 Calm Mind;Psychic;Status;0;0;20;Raises user's Special Attack and Special Defense.;0
@@ -152,7 +152,7 @@ Cross Poison;Poison;Physical;70;100;20;High critical hit ratio. May poison oppon
 Crunch;Dark;Physical;80;100;15;May lower opponent's Defense.;20
 Crush Claw;Normal;Physical;75;95;10;May lower opponent's Defense.;50
 Crush Grip;Normal;Physical;0;100;5;More powerful when opponent has higher HP.;0
-Curse;Ghost;Status;0;0;10;Ghosts lose 50% of max HP and curse the opponent; Non-Ghosts raise Attack, Defense and lower Speed.;0
+Curse;Ghost;Status;0;0;10;"Ghosts lose 50% of max HP and curse the opponent; Non-Ghosts raise Attack, Defense and lower Speed.";0
 Cut;Normal;Physical;50;95;30;;0
 Dark Pulse;Dark;Special;80;100;15;May cause flinching.;20
 Dark Void;Dark;Status;0;50;10;Puts all adjacent opponents to sleep.;0
@@ -169,14 +169,14 @@ Diamond Storm;Rock;Physical;100;95;5;May sharply raise user's Defense.;50
 Dig;Ground;Physical;80;100;10;Digs underground on first turn, attacks on second. Can also escape from caves.;0
 Dire Claw;Poison;Physical;80;100;15;May poison, paralyze or put the opponent to sleep.;0
 Disable;Normal;Status;0;100;20;Opponent can't use its last attack for a few turns.;0
-Disarming Voice;Fairy;Special;40;∞;15;Ignores Accuracy and Evasiveness.;0
+Disarming Voice;Fairy;Special;40;999;15;Ignores Accuracy and Evasiveness.;0
 Discharge;Electric;Special;80;100;15;May paralyze opponent.;30
 Dive;Water;Physical;80;100;10;Dives underwater on first turn, attacks on second turn.;0
 Dizzy Punch;Normal;Physical;70;100;10;May confuse opponent.;20
 Doodle;Normal;Status;0;100;10;Changes the abilities of the user and its teammates to that of the target.;0
 Doom Desire;Steel;Special;140;100;5;Damage occurs 2 turns later.;0
 Double Hit;Normal;Physical;35;90;10;Hits twice in one turn.;0
-Double Iron Bash;Steel;Physical;60;100;5;Hits twice in one turn; may cause flinching.;30
+Double Iron Bash;Steel;Physical;60;100;5;"Hits twice in one turn; may cause flinching.";30
 Double Kick;Fighting;Physical;30;100;30;Hits twice in one turn.;0
 Double Shock;Electric;Physical;120;100;5;After using this move, the user will no longer be Electric type.;0
 Double Slap;Normal;Physical;15;85;10;Hits 2-5 times in one turn.;0
@@ -185,7 +185,7 @@ Double-Edge;Normal;Physical;120;100;15;User receives recoil damage.;0
 Draco Meteor;Dragon;Special;130;90;5;Sharply lowers user's Special Attack.;100
 Dragon Ascent;Flying;Physical;120;100;5;Lowers user's Defense and Special Defense.;100
 Dragon Breath;Dragon;Special;60;100;20;May paralyze opponent.;30
-Dragon Cheer;Dragon;Status;0;∞;15;;0
+Dragon Cheer;Dragon;Status;0;999;15;;0
 Dragon Claw;Dragon;Physical;80;100;15;;0
 Dragon Dance;Dragon;Status;0;0;20;Raises user's Attack and Speed.;0
 Dragon Darts;Dragon;Physical;50;100;10;User attacks twice.;0
@@ -237,11 +237,11 @@ Fairy Lock;Fairy;Status;0;0;10;Prevents fleeing in the next turn.;0
 Fairy Wind;Fairy;Special;40;100;30;;0
 Fake Out;Normal;Physical;40;100;10;User attacks first, foe flinches. Only usable on first turn.;100
 Fake Tears;Dark;Status;0;100;20;Sharply lowers opponent's Special Defense.;0
-False Surrender;Dark;Physical;80;∞;10;Ignores Accuracy and Evasiveness.;0
+False Surrender;Dark;Physical;80;999;10;Ignores Accuracy and Evasiveness.;0
 False Swipe;Normal;Physical;40;100;40;Always leaves opponent with at least 1 HP.;0
 Feather Dance;Flying;Status;0;100;15;Sharply lowers opponent's Attack.;0
 Feint;Normal;Physical;30;100;10;Only hits if opponent uses Protect or Detect in the same turn.;0
-Feint Attack;Dark;Physical;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Feint Attack;Dark;Physical;60;999;20;Ignores Accuracy and Evasiveness.;0
 Fell Stinger;Bug;Physical;50;100;25;Drastically raises user's Attack if target is KO'd.;0
 Fickle Beam;Dragon;Special;80;100;5;May deal double damage.;0
 Fiery Dance;Fire;Special;80;100;10;May raise user's Special Attack.;50
@@ -272,7 +272,7 @@ Flip Turn;Water;Physical;60;100;20;After making its attack, the user rushes back
 Floaty Fall;Flying;Physical;90;95;15;May cause flinching.;30
 Floral Healing;Fairy;Status;0;0;10;The user restores the target's HP by up to half of its max HP. It restores more HP when the terrain is grass.;0
 Flower Shield;Fairy;Status;0;0;10;Sharply raises Defense of all Grass-type Pokémon on the field.;100
-Flower Trick;Grass;Physical;70;∞;10;Never misses; always results in a critical hit.;0
+Flower Trick;Grass;Physical;70;999;10;"Never misses; always results in a critical hit.";0
 Fly;Flying;Physical;90;95;15;Flies up on first turn, attacks on second turn.;0
 Flying Press;Fighting;Physical;100;95;10;Deals Fighting and Flying type damage.;0
 Focus Blast;Fighting;Special;120;70;5;May lower opponent's Special Defense.;10
@@ -296,39 +296,39 @@ Fury Swipes;Normal;Physical;18;80;15;Hits 2-5 times in one turn.;0
 Fusion Bolt;Electric;Physical;100;100;5;Power increases if Fusion Flare is used in the same turn.;0
 Fusion Flare;Fire;Special;100;100;5;Power increases if Fusion Bolt is used in the same turn.;0
 Future Sight;Psychic;Special;120;100;10;Damage occurs 2 turns later.;0
-G-Max Befuddle;Bug;0;0;∞;5;Butterfree-exclusive G-Max Move. Poisons, paralyzes, or puts opponent to sleep.;100
-G-Max Cannonade;Water;0;0;∞;10;Blastoise-exclusive G-Max Move. Damages non-Water types for 4 turns.;0
-G-Max Centiferno;Fire;0;0;∞;5;Centiskorch-exclusive G-Max Move. Traps opponents for 4-5 turns.;100
-G-Max Chi Strike;Fighting;0;0;∞;5;Machamp-exclusive G-Max Move. Increases critical hit ratio.;0
-G-Max Cuddle;Normal;0;0;∞;5;Eevee-exclusive G-Max Move. Infatuates opponents.;100
-G-Max Depletion;Dragon;0;0;∞;5;Duraludon-exclusive G-Max Move. Reduces opponent's PP.;0
-G-Max Drum Solo;Grass;0;160;∞;5;Rillaboom-exclusive G-Max Move. Ignores target's ability.;0
-G-Max Finale;Fairy;0;0;∞;5;Alcremie-exclusive G-Max Move. Heals the user's team.;0
-G-Max Fireball;Fire;0;160;∞;5;Cinderace-exclusive G-Max Move. Ignores target's ability.;0
-G-Max Foam Burst;Water;0;0;∞;5;Kingler-exclusive G-Max Move. Harshly lowers opponents' Speed.;100
-G-Max Gold Rush;Normal;0;0;∞;5;Meowth-exclusive G-Max Move. Confuses opponents and earns more money.;100
-G-Max Gravitas;Psychic;0;0;∞;5;Orbeetle-exclusive G-Max Move. Summons Gravity for 5 turns.;0
-G-Max Hydrosnipe;Water;0;160;∞;5;Inteleon-exclusive G-Max Move. Ignores target's ability.;0
-G-Max Malodor;Poison;0;0;∞;5;Garbodor-exclusive G-Max Move. Poisons opponents.;100
-G-Max Meltdown;Steel;0;0;∞;5;Melmetal-exclusive G-Max Move. Prevents opponents using the same move twice in a row.;0
-G-Max One Blow;Dark;0;0;∞;5;Urshifu Single-Strike Style-exclusive G-Max Move. Strikes through Max Guard and Protect.;0
-G-Max Rapid Flow;Water;0;0;∞;5;Urshifu Rapid-Strike Style-exclusive G-Max Move. Strikes through Max Guard and Protect.;0
-G-Max Replenish;Normal;0;0;∞;5;Snorlax-exclusive G-Max Move. Recycles Berries.;0
-G-Max Resonance;Ice;0;0;∞;5;Lapras-exclusive G-Max Move. Reduces damage for 5 turns.;0
-G-Max Sandblast;Ground;0;0;∞;5;Sandaconda-exclusive G-Max Move. Traps opponents for 4-5 turns.;100
-G-Max Smite;Fairy;0;0;∞;5;Hatterene-exclusive G-Max Move. Confuses opponents.;100
-G-Max Snooze;Dark;0;0;∞;5;Grimmsnarl-exclusive G-Max Move. Makes opponents drowsy.;0
-G-Max Steelsurge;Steel;0;0;∞;5;Copperajah-exclusive G-Max Move. Sets up Spikes on the field.;0
-G-Max Stonesurge;Water;0;0;∞;5;Drednaw-exclusive G-Max Move. Sets up Stealth Rock.;0
-G-Max Stun Shock;Electric;0;0;∞;10;Toxtricity-exclusive G-Max Move. Poisons or paralyzes opponents.;100
-G-Max Sweetness;Grass;0;0;∞;10;Appletun-exclusive G-Max Move. Heals status conditions of user's team.;0
-G-Max Tartness;Grass;0;0;∞;10;Flapple-exclusive G-Max Move. Reduces opponents' evasiveness.;100
-G-Max Terror;Ghost;0;0;∞;10;Gengar-exclusive G-Max Move. Prevents opponent from switching out.;0
-G-Max Vine Lash;Grass;0;0;∞;10;Venusaur-exclusive G-Max Move. Damages non-Grass types for 4 turns.;0
-G-Max Volcalith;Rock;0;0;∞;10;Coalossal-exclusive G-Max Move. Deals damage for 4 turns.;100
-G-Max Volt Crash;Electric;0;0;∞;10;Pikachu-exclusive G-Max Move. Paralyzes opponents.;100
-G-Max Wildfire;Fire;0;0;∞;10;Charizard-exclusive G-Max Move. Damages non-Fire types for 4 turns.;100
-G-Max Wind Rage;Flying;0;0;∞;10;Corviknight-exclusive G-Max Move. Removes battlefield hazards.;0
+G-Max Befuddle;Bug;0;0;999;5;Butterfree-exclusive G-Max Move. Poisons, paralyzes, or puts opponent to sleep.;100
+G-Max Cannonade;Water;0;0;999;10;Blastoise-exclusive G-Max Move. Damages non-Water types for 4 turns.;0
+G-Max Centiferno;Fire;0;0;999;5;Centiskorch-exclusive G-Max Move. Traps opponents for 4-5 turns.;100
+G-Max Chi Strike;Fighting;0;0;999;5;Machamp-exclusive G-Max Move. Increases critical hit ratio.;0
+G-Max Cuddle;Normal;0;0;999;5;Eevee-exclusive G-Max Move. Infatuates opponents.;100
+G-Max Depletion;Dragon;0;0;999;5;Duraludon-exclusive G-Max Move. Reduces opponent's PP.;0
+G-Max Drum Solo;Grass;0;160;999;5;Rillaboom-exclusive G-Max Move. Ignores target's ability.;0
+G-Max Finale;Fairy;0;0;999;5;Alcremie-exclusive G-Max Move. Heals the user's team.;0
+G-Max Fireball;Fire;0;160;999;5;Cinderace-exclusive G-Max Move. Ignores target's ability.;0
+G-Max Foam Burst;Water;0;0;999;5;Kingler-exclusive G-Max Move. Harshly lowers opponents' Speed.;100
+G-Max Gold Rush;Normal;0;0;999;5;Meowth-exclusive G-Max Move. Confuses opponents and earns more money.;100
+G-Max Gravitas;Psychic;0;0;999;5;Orbeetle-exclusive G-Max Move. Summons Gravity for 5 turns.;0
+G-Max Hydrosnipe;Water;0;160;999;5;Inteleon-exclusive G-Max Move. Ignores target's ability.;0
+G-Max Malodor;Poison;0;0;999;5;Garbodor-exclusive G-Max Move. Poisons opponents.;100
+G-Max Meltdown;Steel;0;0;999;5;Melmetal-exclusive G-Max Move. Prevents opponents using the same move twice in a row.;0
+G-Max One Blow;Dark;0;0;999;5;Urshifu Single-Strike Style-exclusive G-Max Move. Strikes through Max Guard and Protect.;0
+G-Max Rapid Flow;Water;0;0;999;5;Urshifu Rapid-Strike Style-exclusive G-Max Move. Strikes through Max Guard and Protect.;0
+G-Max Replenish;Normal;0;0;999;5;Snorlax-exclusive G-Max Move. Recycles Berries.;0
+G-Max Resonance;Ice;0;0;999;5;Lapras-exclusive G-Max Move. Reduces damage for 5 turns.;0
+G-Max Sandblast;Ground;0;0;999;5;Sandaconda-exclusive G-Max Move. Traps opponents for 4-5 turns.;100
+G-Max Smite;Fairy;0;0;999;5;Hatterene-exclusive G-Max Move. Confuses opponents.;100
+G-Max Snooze;Dark;0;0;999;5;Grimmsnarl-exclusive G-Max Move. Makes opponents drowsy.;0
+G-Max Steelsurge;Steel;0;0;999;5;Copperajah-exclusive G-Max Move. Sets up Spikes on the field.;0
+G-Max Stonesurge;Water;0;0;999;5;Drednaw-exclusive G-Max Move. Sets up Stealth Rock.;0
+G-Max Stun Shock;Electric;0;0;999;10;Toxtricity-exclusive G-Max Move. Poisons or paralyzes opponents.;100
+G-Max Sweetness;Grass;0;0;999;10;Appletun-exclusive G-Max Move. Heals status conditions of user's team.;0
+G-Max Tartness;Grass;0;0;999;10;Flapple-exclusive G-Max Move. Reduces opponents' evasiveness.;100
+G-Max Terror;Ghost;0;0;999;10;Gengar-exclusive G-Max Move. Prevents opponent from switching out.;0
+G-Max Vine Lash;Grass;0;0;999;10;Venusaur-exclusive G-Max Move. Damages non-Grass types for 4 turns.;0
+G-Max Volcalith;Rock;0;0;999;10;Coalossal-exclusive G-Max Move. Deals damage for 4 turns.;100
+G-Max Volt Crash;Electric;0;0;999;10;Pikachu-exclusive G-Max Move. Paralyzes opponents.;100
+G-Max Wildfire;Fire;0;0;999;10;Charizard-exclusive G-Max Move. Damages non-Fire types for 4 turns.;100
+G-Max Wind Rage;Flying;0;0;999;10;Corviknight-exclusive G-Max Move. Removes battlefield hazards.;0
 Gastro Acid;Poison;Status;0;100;10;Cancels out the effect of the opponent's Ability.;0
 Gear Grind;Steel;Physical;50;85;15;Hits twice in one turn.;0
 Gear Up;Steel;Status;0;0;20;The user engages its gears to raise the Attack and Sp. Atk stats of ally Pokémon with the Plus or Minus Ability.;0
@@ -401,8 +401,8 @@ Hyper Beam;Normal;Special;150;90;5;User must recharge next turn.;0
 Hyper Drill;Normal;Physical;100;100;5;Can strike through Protect/Detect.;0
 Hyper Fang;Normal;Physical;80;90;15;May cause flinching.;10
 Hyper Voice;Normal;Special;90;100;10;;0
-Hyperspace Fury;Dark;Physical;100;∞;5;Lowers user's Defense. Can strike through Protect/Detect.;100
-Hyperspace Hole;Psychic;Special;80;∞;5;Can strike through Protect/Detect.;0
+Hyperspace Fury;Dark;Physical;100;999;5;Lowers user's Defense. Can strike through Protect/Detect.;100
+Hyperspace Hole;Psychic;Special;80;999;5;Can strike through Protect/Detect.;0
 Hypnosis;Psychic;Status;0;60;20;Puts opponent to sleep.;0
 Ice Ball;Ice;Physical;30;90;20;Doubles in power each turn for 5 turns.;0
 Ice Beam;Ice;Special;90;100;10;May freeze opponent.;10
@@ -437,7 +437,7 @@ Karate Chop;Fighting;Physical;50;100;25;High critical hit ratio.;0
 Kinesis;Psychic;Status;0;80;15;Lowers opponent's Accuracy.;0
 King's Shield;Steel;Status;0;0;10;Protects the user and lowers opponent's Attack on contact.;0
 Knock Off;Dark;Physical;65;100;20;Removes opponent's held item for the rest of the battle.;0
-Kowtow Cleave;Dark;Physical;85;∞;10;Always hits.;0
+Kowtow Cleave;Dark;Physical;85;999;10;Always hits.;0
 Land's Wrath;Ground;Physical;90;100;10;;0
 Laser Focus;Normal;Status;0;0;30;User's next attack is guaranteed to result in a critical hit.;0
 Lash Out;Dark;Physical;75;100;5;Double power if stats were lowered during the turn.;0
@@ -456,7 +456,7 @@ Lick;Ghost;Physical;30;100;30;May paralyze opponent.;30
 Life Dew;Water;Status;0;0;10;User and teammates recover HP.;0
 Light of Ruin;Fairy;Special;140;90;5;User receives recoil damage.;0
 Light Screen;Psychic;Status;0;0;30;Halves damage from Special attacks for 5 turns.;0
-Light That Burns the Sky;Psychic;Special;200;0;1;Ultra Necrozma-exclusive Z-Move. Ignores target's ability; uses highest Attack stat.;0
+Light That Burns the Sky;Psychic;Special;200;0;1;"Ultra Necrozma-exclusive Z-Move. Ignores target's ability; uses highest Attack stat.";0
 Liquidation;Water;Physical;85;100;10;May lower opponent's Defense.;20
 Lock-On;Normal;Status;0;0;5;User's next attack is guaranteed to hit.;0
 Lovely Kiss;Normal;Status;0;75;10;Puts opponent to sleep.;0
@@ -472,10 +472,10 @@ Mach Punch;Fighting;Physical;40;100;30;User attacks first.;0
 Magic Coat;Psychic;Status;0;0;15;Reflects moves that cause status conditions back to the attacker.;0
 Magic Powder;Psychic;Status;0;100;20;Changes target's type to Psychic.;0
 Magic Room;Psychic;Status;0;0;10;Suppresses the effects of held items for five turns.;0
-Magical Leaf;Grass;Special;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Magical Leaf;Grass;Special;60;999;20;Ignores Accuracy and Evasiveness.;0
 Magical Torque;Fairy;Physical;100;100;10;May confuse the opponent.;0
 Magma Storm;Fire;Special;100;75;5;Traps opponent, damaging them for 4-5 turns.;100
-Magnet Bomb;Steel;Physical;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Magnet Bomb;Steel;Physical;60;999;20;Ignores Accuracy and Evasiveness.;0
 Magnet Rise;Electric;Status;0;0;10;User becomes immune to Ground-type moves for 5 turns.;0
 Magnetic Flux;Electric;Status;0;0;20;Raises Defense and Sp. Defense of Plus/Minus Pokémon.;0
 Magnitude;Ground;Physical;0;100;30;Hits with random power.;0
@@ -584,7 +584,7 @@ Petal Blizzard;Grass;Physical;90;100;15;Hits all adjacent Pokémon.;0
 Petal Dance;Grass;Special;120;100;10;User attacks for 2-3 turns but then becomes confused.;0
 Phantom Force;Ghost;Physical;90;100;10;Disappears on first turn, attacks on second. Can strike through Protect/Detect.;0
 Photon Geyser;Psychic;Special;100;100;5;Uses Attack or Special Attack stat, whichever is higher.;0
-Pika Papow;Electric;Special;0;∞;20;Power increases when player's bond is stronger.;0
+Pika Papow;Electric;Special;0;999;20;Power increases when player's bond is stronger.;0
 Pin Missile;Bug;Physical;25;95;20;Hits 2-5 times in one turn.;0
 Plasma Fists;Electric;Physical;100;100;15;Changes Normal-type moves to Electric-type moves.;0
 Play Nice;Normal;Status;0;0;20;Lowers opponent's Attack. Always hits.;100
@@ -682,7 +682,7 @@ Ruination;Dark;Special;0;90;10;Halves the opponent's HP.;0
 Sacred Fire;Fire;Physical;100;95;5;May burn opponent.;50
 Sacred Sword;Fighting;Physical;90;100;15;Ignores opponent's stat changes.;0
 Safeguard;Normal;Status;0;0;25;The user's party is protected from status conditions.;0
-Salt Cure;Rock;Physical;40;100;15;Deals damage each turn; Steel and Water types are more affected.;0
+Salt Cure;Rock;Physical;40;100;15;"Deals damage each turn; Steel and Water types are more affected.";0
 Sand Attack;Ground;Status;0;100;15;Lowers opponent's Accuracy.;0
 Sand Tomb;Ground;Physical;35;85;15;Traps opponent, damaging them for 4-5 turns.;100
 Sandsear Storm;Ground;Special;100;80;10;May burn target.;0
@@ -707,7 +707,7 @@ Shadow Ball;Ghost;Special;80;100;15;May lower opponent's Special Defense.;20
 Shadow Bone;Ghost;Physical;85;100;10;May lower opponent's Defense.;20
 Shadow Claw;Ghost;Physical;70;100;15;High critical hit ratio.;0
 Shadow Force;Ghost;Physical;120;100;5;Disappears on first turn, attacks on second. Can strike through Protect/Detect.;0
-Shadow Punch;Ghost;Physical;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Shadow Punch;Ghost;Physical;60;999;20;Ignores Accuracy and Evasiveness.;0
 Shadow Sneak;Ghost;Physical;40;100;30;User attacks first.;0
 Sharpen;Normal;Status;0;0;30;Raises user's Attack.;0
 Shattered Psyche;Psychic;0;0;0;1;Psychic type Z-Move.;0
@@ -718,7 +718,7 @@ Shell Smash;Normal;Status;0;0;15;Sharply raises user's Attack, Special Attack an
 Shell Trap;Fire;Special;150;100;5;Deals more damage to opponent if hit by a Physical move.;0
 Shelter;Steel;Status;0;0;10;Raises user's Defense.;0
 Shift Gear;Steel;Status;0;0;10;Raises user's Attack and sharply raises Speed.;0
-Shock Wave;Electric;Special;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Shock Wave;Electric;Special;60;999;20;Ignores Accuracy and Evasiveness.;0
 Shore Up;Ground;Status;0;0;5;The user regains up to half of its max HP. It restores more HP in a sandstorm.;0
 Signal Beam;Bug;Special;75;100;15;May confuse opponent.;10
 Silk Trap;Bug;Status;0;0;10;Protects the user and lowers opponent's Speed on contact.;0
@@ -765,7 +765,7 @@ Sparkling Aria;Water;Special;90;100;10;Heals the burns of its target.;0
 Sparkly Swirl;Fairy;Special;90;100;15;Cures all status problems in the party Pokémon.;0
 Spectral Thief;Ghost;Physical;90;100;10;The user hides in the target's shadow, steals the target's stat boosts, and then attacks.;0
 Speed Swap;Psychic;Status;0;0;10;The user exchanges Speed stats with the target.;0
-Spicy Extract;Grass;Status;0;∞;15;Harshly lowers the opponent's Defense and sharply raises their Attack.;0
+Spicy Extract;Grass;Status;0;999;15;Harshly lowers the opponent's Defense and sharply raises their Attack.;0
 Spider Web;Bug;Status;0;0;10;Opponent cannot escape/switch.;0
 Spike Cannon;Normal;Physical;20;100;15;Hits 2-5 times in one turn.;0
 Spikes;Ground;Status;0;0;20;Damages opponents switching into battle.;0
@@ -821,13 +821,13 @@ Swagger;Normal;Status;0;85;15;Confuses opponent, but sharply raises its Attack.;
 Swallow;Normal;Status;0;0;10;The more times the user has performed Stockpile, the more HP is recovered.;0
 Sweet Kiss;Fairy;Status;0;75;10;Confuses opponent.;0
 Sweet Scent;Normal;Status;0;100;20;Lowers opponent's Evasiveness.;0
-Swift;Normal;Special;60;∞;20;Ignores Accuracy and Evasiveness.;0
+Swift;Normal;Special;60;999;20;Ignores Accuracy and Evasiveness.;0
 Switcheroo;Dark;Status;0;100;10;Swaps held items with the opponent.;0
 Swords Dance;Normal;Status;0;0;20;Sharply raises user's Attack.;0
 Synchronoise;Psychic;Special;120;100;10;Hits any Pokémon that shares a type with the user.;0
 Synthesis;Grass;Status;0;0;5;User recovers HP. Amount varies with the weather.;0
 Syrup Bomb;Grass;Special;60;85;10;Lowers opponent's Speed each turn for 3 turns.;0
-Tachyon Cutter;Steel;Special;50;∞;10;Guaranteed to hit twice in a row.;0
+Tachyon Cutter;Steel;Special;50;999;10;Guaranteed to hit twice in a row.;0
 Tackle;Normal;Physical;40;100;35;;0
 Tail Glow;Bug;Status;0;0;20;Drastically raises user's Special Attack.;0
 Tail Slap;Normal;Physical;25;85;10;Hits 2-5 times in one turn.;0
@@ -843,7 +843,7 @@ Techno Blast;Normal;Special;120;100;5;Type depends on the Drive being held.;0
 Tectonic Rage;Ground;0;0;0;1;Ground type Z-Move.;0
 Teeter Dance;Normal;Status;0;100;20;Confuses all Pokémon.;0
 Telekinesis;Psychic;Status;0;0;15;Ignores opponent's Evasiveness for three turns, add Ground immunity.;0
-Teleport;Psychic;Status;0;0;20;Allows user to flee wild battles; also warps player to last PokéCenter.;0
+Teleport;Psychic;Status;0;0;20;"Allows user to flee wild battles; also warps player to last PokéCenter.";0
 Temper Flare;Fire;Physical;75;100;10;;0
 Tera Blast;Normal;Special;80;100;10;Changes type when the user has Terastallized.;0
 Tera Starstorm;Normal;Special;120;100;5;;0
@@ -881,7 +881,7 @@ Triple Axel;Ice;Physical;20;90;10;Attacks thrice with more power each time.;0
 Triple Dive;Water;Physical;30;95;10;Hits 3 times in a row.;0
 Triple Kick;Fighting;Physical;10;90;10;Hits thrice in one turn at increasing power.;0
 Trop Kick;Grass;Physical;70;100;15;Lowers opponent's Attack.;100
-Trump Card;Normal;Special;0;∞;5;The lower the PP, the higher the power.;0
+Trump Card;Normal;Special;0;999;5;The lower the PP, the higher the power.;0
 Twin Beam;Psychic;Special;40;100;10;Hits twice in one turn.;0
 Twineedle;Bug;Physical;25;100;20;Hits twice in one turn. May poison opponent.;20
 Twinkle Tackle;Fairy;0;0;0;1;Fairy type Z-Move.;0
@@ -891,13 +891,13 @@ Upper Hand;Fighting;Physical;65;100;15;Strikes before a target's priority move.;
 Uproar;Normal;Special;90;100;10;User attacks for 3 turns and prevents sleep.;0
 V-create;Fire;Physical;180;95;5;Lowers user's Defense, Special Defense and Speed.;100
 Vacuum Wave;Fighting;Special;40;100;30;User attacks first.;0
-Veevee Volley;Normal;Physical;0;∞;20;Power increases when player's bond is stronger.;0
+Veevee Volley;Normal;Physical;0;999;20;Power increases when player's bond is stronger.;0
 Venom Drench;Poison;Status;0;100;20;Lowers poisoned opponent's Special Attack and Speed.;100
 Venoshock;Poison;Special;65;100;10;Inflicts double damage if the target is poisoned.;0
 Victory Dance;Fighting;Status;0;0;10;Raises Attack and Defense.;0
 Vine Whip;Grass;Physical;45;100;25;;0
 Vise Grip;Normal;Physical;55;100;30;;0
-Vital Throw;Fighting;Physical;70;∞;10;User attacks last, but ignores Accuracy and Evasiveness.;0
+Vital Throw;Fighting;Physical;70;999;10;User attacks last, but ignores Accuracy and Evasiveness.;0
 Volt Switch;Electric;Special;70;100;20;User must switch out after attacking.;0
 Volt Tackle;Electric;Physical;120;100;15;User receives recoil damage. May paralyze opponent.;10
 Wake-Up Slap;Fighting;Physical;70;100;10;Power doubles if opponent is asleep, but wakes it up.;0
