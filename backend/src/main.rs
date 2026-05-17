@@ -5,7 +5,6 @@ mod schema;
 mod constants;
 
 use std::env;
-use std::sync::OnceLock;
 use dotenv::dotenv;
 use serde::Serialize;
 use schema::state::LuckEvent;
@@ -14,23 +13,15 @@ use axum::{
     routing::{get, post},
     Router,
     response::IntoResponse,
-    http::{StatusCode, header},
+    http::StatusCode,
     Json
 };
+use tower_http::cors::{CorsLayer, Any};
 use lambda_http::{run, Error};
 use tokio::net::TcpListener;
 
 use fetch::fetch_replay;
 use analyze::analyze;
-
-static API_URL: OnceLock<String> = OnceLock::new();
-
-fn get_api_url() -> &'static String {
-    API_URL.get_or_init(|| {
-        dotenv().ok();
-        env::var("API_URL").expect("API_URL must be set")
-    })
-}
 
 #[derive(Serialize)]
 struct AnalyzeResponse {
@@ -53,7 +44,6 @@ async fn analyze_replay(body: String) -> impl IntoResponse {
 
     (
         StatusCode::OK,
-        [(header::ACCESS_CONTROL_ALLOW_ORIGIN, get_api_url().as_str())],
         Json(response_data)
     )
 }
@@ -62,9 +52,18 @@ async fn analyze_replay(body: String) -> impl IntoResponse {
 async fn main() -> Result<(), Error> {
     dotenv().ok();
     
+    let frontend_url = env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    
+    // Setup CORS
+    let cors = CorsLayer::new()
+        .allow_origin(frontend_url.parse::<axum::http::HeaderValue>().unwrap_or(axum::http::HeaderValue::from_static("*")))
+        .allow_methods([axum::http::Method::GET, axum::http::Method::POST, axum::http::Method::OPTIONS])
+        .allow_headers(Any);
+
     let app = Router::new()
         .route("/", get(index))
-        .route("/analyze", post(analyze_replay));
+        .route("/analyze", post(analyze_replay))
+        .layer(cors);
 
     let is_lambda = env::var("AWS_LAMBDA_RUNTIME_API").is_ok() || env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok();
 
@@ -72,7 +71,7 @@ async fn main() -> Result<(), Error> {
         run(app).await?;
     } else {
         let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
-        let addr = format!("localhost:{port}");
+        let addr = format!("127.0.0.1:{port}");
         println!("Running locally on http://{addr}");
         let listener = TcpListener::bind(addr).await.unwrap();
         axum::serve(listener, app).await.unwrap();
