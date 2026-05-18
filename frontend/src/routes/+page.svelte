@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { env } from '$env/dynamic/public';
+	import { PUBLIC_API_URL } from '$env/static/public';
 	import LuckGraph from '$lib/LuckGraph.svelte';
 	import { getPokemonSpriteUrl } from '$lib/pokemon';
 
@@ -31,7 +31,7 @@
 		result = null;
 
 		try {
-			const apiUrl = env.PUBLIC_API_URL || 'http://localhost:8080';
+			const apiUrl = PUBLIC_API_URL || 'http://localhost:8080';
 			const response = await fetch(`${apiUrl}/analyze`, {
 				method: 'POST',
 				headers: {
