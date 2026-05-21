@@ -11,6 +11,7 @@ pub struct PokemonState {
     pub is_fainted: bool,
     pub tera_type: Option<String>,
     pub is_mega: bool,
+    pub status_turns: u32,
     pub pending_flinch_chance: Option<(u64, String)>, // (flinch_chance, move_name)
 }
 
@@ -62,6 +63,7 @@ impl PokemonState {
             is_fainted: false,
             tera_type: None,
             is_mega: false,
+            status_turns: 0,
             pending_flinch_chance: None,
         }
     }

@@ -8,4 +8,5 @@ pub fn handle_status(state: &mut GameState, line: &SubLine) {
     let Some(pokemon) = player_state.team.get_mut(nickname) else { return };
 
     pokemon.status = line.status.clone();
+    pokemon.status_turns = 0;
 }
