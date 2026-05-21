@@ -1,4 +1,6 @@
-#[derive(Debug, Clone)]
+use serde::Serialize;
+
+#[derive(Debug, Clone, Serialize)]
 pub struct PokemonState {
     pub nickname: String,
     pub species: String,
@@ -9,9 +11,10 @@ pub struct PokemonState {
     pub is_fainted: bool,
     pub tera_type: Option<String>,
     pub is_mega: bool,
+    pub pending_flinch_chance: Option<(u64, String)>, // (flinch_chance, move_name)
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct StatBoosts {
     pub atk: i8,
     pub def: i8,
@@ -22,7 +25,8 @@ pub struct StatBoosts {
     pub eva: i8,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Status {
     Burn,
     Freeze,
@@ -58,6 +62,7 @@ impl PokemonState {
             is_fainted: false,
             tera_type: None,
             is_mega: false,
+            pending_flinch_chance: None,
         }
     }
 }

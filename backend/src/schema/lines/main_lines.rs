@@ -20,6 +20,9 @@ pub struct MainLine {
     pub target_pokemon_nickname: Option<String>,
     // DetailsChange uses `species` for changed_form (reused)
 
+    // Cant-specific fields
+    pub reason: Option<String>,
+
     pub sublines: Vec<SubLine>,
 }
 
@@ -67,6 +70,7 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            reason: None,
             sublines: Vec::new(),
         }
     }
@@ -90,6 +94,7 @@ impl MainLine {
             move_name: Some(move_name),
             target_player: Some(target_player),
             target_pokemon_nickname: Some(target_pokemon_nickname),
+            reason: None,
             sublines: Vec::new(),
         }
     }
@@ -110,6 +115,7 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            reason: None,
             sublines: Vec::new(),
         }
     }
@@ -131,6 +137,42 @@ impl MainLine {
             move_name: None,
             target_player: None,
             target_pokemon_nickname: None,
+            reason: None,
+            sublines: Vec::new(),
+        }
+    }
+
+    pub fn from_cant(line: &str) -> Self {
+        let mut split = line.split('|');
+        split.next();
+        split.next(); // skip "cant" or "-cant"
+        let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
+        let reason = split.next().unwrap_or_default().trim().to_string();
+        let (target_player, target_pokemon_nickname) = if reason == "flinch" {
+            // For flinch cant, we can also extract the opponent or source move if present
+            let of_part = split.next().unwrap_or_default().trim();
+            if of_part.starts_with("[of]") {
+                let of_split = of_part.strip_prefix("[of]").unwrap_or_default().trim();
+                let (opp_player, opp_nick) = extract_pokemon(of_split);
+                (Some(opp_player), Some(opp_nick))
+            } else {
+                (None, None)
+            }
+        } else {
+            (None, None)
+        };
+
+        MainLine {
+            line_type: MainLineType::Cant,
+            player,
+            pokemon_nickname,
+            species: None,
+            pokemon_current_hp: None,
+            pokemon_max_hp: None,
+            move_name: None,
+            target_player,
+            target_pokemon_nickname,
+            reason: Some(reason),
             sublines: Vec::new(),
         }
     }

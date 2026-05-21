@@ -19,4 +19,5 @@ pub static BASE_CRIT_CHANCE_PER_GEN: LazyLock<HashMap<u8, f64>> = LazyLock::new(
 pub const CRIT_WEIGHT: f64 = 1.0;
 pub const MISS_WEIGHT: f64 = 1.5;
 pub const SECONDARY_EFFECT_WEIGHT: f64 = 0.5;
+pub const STATUS_WEIGHT: f64 = 1.0;
 

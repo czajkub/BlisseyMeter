@@ -4,6 +4,7 @@ pub enum MainLineType {
     Move,
     Faint,
     DetailsChange,
+    Cant,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -21,7 +22,6 @@ pub enum SubLineType {
     Crit,    
     Miss,
     Status,
-    Flinch,
 
     // Stat changes
     Boost,
@@ -49,6 +49,7 @@ pub enum InfoLineType {
     Upkeep,
     Time,
     Turn,
+    Cant,
 
     Win,
     Join,

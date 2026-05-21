@@ -6,14 +6,27 @@ pub fn handle_switch(state: &mut GameState, line: &MainLine) {
         panic!("Invalid player: {}", line.player);
     };
 
-    player_state.active_pokemon = Some(line.pokemon_nickname.clone());
+    let nickname = &line.pokemon_nickname;
+    let species = line.species.as_deref().unwrap_or("");
 
-    if !player_state.team.contains_key(&line.pokemon_nickname) {
+    player_state.active_pokemon = Some(nickname.clone());
+
+    if nickname != species && !species.is_empty() {
+        player_state.team.remove(species);
+    }
+
+    if let Some(pokemon) = player_state.team.get_mut(nickname) {
+        pokemon.current_hp = line.pokemon_current_hp.unwrap_or(pokemon.current_hp);
+        pokemon.max_hp = line.pokemon_max_hp.unwrap_or(pokemon.max_hp);
+        if pokemon.species.is_empty() && !species.is_empty() {
+            pokemon.species = species.to_string();
+        }
+    } else {
         player_state.team.insert(
-            line.pokemon_nickname.clone(),
+            nickname.clone(),
             PokemonState::new(
-                line.pokemon_nickname.clone(),
-                line.species.clone().unwrap_or_default(),
+                nickname.clone(),
+                species.to_string(),
                 line.pokemon_current_hp.unwrap_or(0),
                 line.pokemon_max_hp.unwrap_or(0),
             ),

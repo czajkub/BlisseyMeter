@@ -22,6 +22,7 @@ fn parse_line(line: &str) -> Line {
         "move" => Line::Main(MainLine::from_move(line)),
         "faint" => Line::Main(MainLine::from_faint(line)),
         "detailschange" | "-formechange" => Line::Main(MainLine::from_detailschange(line)),
+        "cant" | "-cant" => Line::Main(MainLine::from_cant(line)),
 
         // Info lines
         "turn" => Line::Info(InfoLine::from_turn(line)),
@@ -34,13 +35,6 @@ fn parse_line(line: &str) -> Line {
         "-status" => Line::Sub(SubLine::from_status(line)),
         "-miss" => Line::Sub(SubLine::from_miss(line)),
         "-crit" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Crit)),
-        "cant" | "-cant" => {
-            if line.contains("|flinch") {
-                Line::Sub(SubLine::from_cant_flinch(line))
-            } else {
-                Line::Unknown
-            }
-        }
 
         // Sub lines - Move effectiveness
         "-resisted" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Resisted)),

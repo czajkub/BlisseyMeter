@@ -248,22 +248,17 @@ impl SubLine {
         let (player, affected_pokemon) = extract_pokemon(split.next().unwrap_or_default());
         let status = Status::from_str(split.next().unwrap_or_default().trim());
 
+        // Parse optional "[from] move: X" or "[from] ability: X" annotation
+        let from = split
+            .next()
+            .and_then(|s| s.trim().strip_prefix("[from]"))
+            .map(|s| s.trim().to_string());
+
         let mut sub = Self::new_empty(SubLineType::Status);
         sub.player = Some(player);
         sub.pokemon_nickname = Some(affected_pokemon);
         sub.status = status;
-        sub
-    }
-
-    pub fn from_cant_flinch(line: &str) -> Self {
-        let mut split = line.split('|');
-        split.next();
-        split.next(); // skip "cant" or "-cant"
-        let (player, affected_pokemon) = extract_pokemon(split.next().unwrap_or_default());
-
-        let mut sub = Self::new_empty(SubLineType::Flinch);
-        sub.player = Some(player);
-        sub.pokemon_nickname = Some(affected_pokemon);
+        sub.from = from;
         sub
     }
 }
