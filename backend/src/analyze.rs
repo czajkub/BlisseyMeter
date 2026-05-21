@@ -34,6 +34,13 @@ fn parse_line(line: &str) -> Line {
         "-status" => Line::Sub(SubLine::from_status(line)),
         "-miss" => Line::Sub(SubLine::from_miss(line)),
         "-crit" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Crit)),
+        "cant" | "-cant" => {
+            if line.contains("|flinch") {
+                Line::Sub(SubLine::from_cant_flinch(line))
+            } else {
+                Line::Unknown
+            }
+        }
 
         // Sub lines - Move effectiveness
         "-resisted" => Line::Sub(SubLine::from_move_effectiveness(line, SubLineType::Resisted)),

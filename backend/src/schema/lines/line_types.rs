@@ -21,6 +21,7 @@ pub enum SubLineType {
     Crit,    
     Miss,
     Status,
+    Flinch,
 
     // Stat changes
     Boost,

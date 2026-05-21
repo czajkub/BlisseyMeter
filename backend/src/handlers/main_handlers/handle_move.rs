@@ -21,17 +21,19 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
     let mut has_miss_subline = false;
     let mut has_unboost_subline = false;
     let mut has_status_subline = false;
+    let mut has_flinch_subline = false;
 
     for subline in &line.sublines {
         match subline.line_type {
             SubLineType::Miss => has_miss_subline = true,
             SubLineType::Unboost => has_unboost_subline = true,
             SubLineType::Status => has_status_subline = true,
+            SubLineType::Flinch => has_flinch_subline = true,
             _ => {},
         }
     }
 
-    let secondary_effect_happened = has_unboost_subline || has_status_subline; // Add more later if needed like volatile statuses
+    let secondary_effect_happened = has_unboost_subline || has_status_subline || has_flinch_subline; // Add more later if needed like volatile statuses
 
     let mut luck_events = Vec::new();
     
@@ -70,7 +72,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick.clone(),
                     category: LuckCategory::CriticalHit,
                     score: CRIT_WEIGHT,
-                    description: String::new(),
+                    description: format!("Critical hit!"),
                     source_move: line.move_name.clone(),
                     is_beneficial: true,
                 });
@@ -83,12 +85,12 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick.clone(),
                     category: LuckCategory::AccuracyMiss,
                     score: MISS_WEIGHT * (1.0 - (miss_chance / 100.0)),
-                    description: format!("Move accuracy: {move_accuracy}"),
+                    description: format!("Move hit with accuracy: {move_accuracy}"),
                     source_move: line.move_name.clone(),
                     is_beneficial: false,
                 });
             }
-            SubLineType::Unboost | SubLineType::Status => {
+            SubLineType::Unboost | SubLineType::Status | SubLineType::Flinch => {
                 if secondary_effect_chance == 100 || secondary_effect_chance == 0 {
                     continue;
                 }
@@ -98,7 +100,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_with_nick.clone(),
                     category: LuckCategory::SecondaryEffect,
                     score: SECONDARY_EFFECT_WEIGHT * ((100.0 - secondary_effect_chance as f64) / 100.0),
-                    description: format!("Move secondary effect chance: {secondary_effect_chance}"),
+                    description: format!("Secondary effect chance: {secondary_effect_chance}"),
                     source_move: line.move_name.clone(),
                     is_beneficial: true,
                 });
