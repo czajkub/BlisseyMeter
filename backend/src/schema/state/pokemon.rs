@@ -67,6 +67,10 @@ impl PokemonState {
             pending_flinch_chance: None,
         }
     }
+
+    pub fn increment_status_turns(&mut self) {
+        self.status_turns += 1;
+    }
 }
 
 impl StatBoosts {

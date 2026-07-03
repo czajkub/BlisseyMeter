@@ -1,9 +1,13 @@
+use tokio::time::Sleep;
+
 use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
+use crate::handlers::sub_handlers::handle_status::handle_status;
 use crate::schema::lines::line_types::SubLineType;
 use crate::schema::lines::main_lines::MainLine;
 use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
+
 
 fn check_preconditions(state: &mut GameState, line: &MainLine, current_turn: u32) {
     // 1. Check Flinch: If the pokemon had a pending flinch chance and successfully moved.
@@ -29,39 +33,39 @@ fn check_preconditions(state: &mut GameState, line: &MainLine, current_turn: u32
         }
     }
 
-    // 2. Check Paralysis: If the pokemon is paralyzed and successfully moved (25% chance to fail).
+    // 2. Check status:
+    // paralysis  - 25% chance of immobility each turn
     let Some(player_state) = state.get_player_state_mut(&line.player) else { return };
     let Some(pokemon) = player_state.team.get(&line.pokemon_nickname) else { return };
 
-    if pokemon.status == Some(Status::Paralysis) {
-        let pokemon_display = player_state.pokemon_display_name(&line.pokemon_nickname);
-        player_state.luck_events.push(LuckEvent {
-            turn: current_turn,
-            pokemon: pokemon_display,
-            category: LuckCategory::StatusTurn,
-            score: STATUS_WEIGHT * 0.25,
-            description: "Moved despite paralysis".to_string(),
-            source_move: None,
-            is_beneficial: true,
-        });
+    let pokemon_display = player_state.pokemon_display_name(&line.pokemon_nickname);
+
+    match pokemon.status {
+        Some(Status::Paralysis) => {
+            player_state.luck_events.push(LuckEvent {
+                turn: current_turn,
+                pokemon: pokemon_display,
+                category: LuckCategory::StatusTurn,
+                score: STATUS_WEIGHT * 0.25,
+                description: "Moved despite paralysis".to_string(),
+                source_move: None,
+                is_beneficial: true,
+            });
+        },
+        Some(Status::Sleep) => {
+            // pokemon is asleep but moved - some sleep talk shenanigans
+            // i dont think anything nees to be done, just leaving it here hanging
+        }
+        _ => {},
     }
+
+
 }
 
 pub fn handle_move(state: &mut GameState, line: &MainLine) {
     let current_turn = state.turn;
 
     check_preconditions(state, line, current_turn);
-
-    let Some(player_state) = state.get_player_state_mut(&line.player) else {
-        panic!("Invalid player: {}", line.player);
-    };
-
-    let moves_map = moves();
-    let move_name = line.move_name.as_deref().unwrap_or_default();
-    let move_data = moves_map.get(move_name);
-
-    let move_accuracy = move_data.map_or(100, |m| m.get_accuracy());
-    let secondary_effect_chance = move_data.and_then(|m| m.secondary_effect).unwrap_or(0);
 
     let mut has_miss_subline = false;
     let mut has_unboost_subline = false;
@@ -71,15 +75,27 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
         match subline.line_type {
             SubLineType::Miss => has_miss_subline = true,
             SubLineType::Unboost => has_unboost_subline = true,
-            SubLineType::Status => has_status_subline = true,
+            SubLineType::Status => {
+                has_status_subline = true;
+                handle_status(state, subline);
+            },
             _ => {},
         }
     }
 
+    let Some(player_state) = state.get_player_state_mut(&line.player) else {
+        panic!("Invalid player: {}", line.player);
+    };
+
+    let moves_map = moves();
+    let move_name = line.move_name.as_deref().unwrap_or_default();
+    let move_data = moves_map.get(move_name);
+    let move_accuracy = move_data.map_or(100, |m| m.get_accuracy());
+
+    let secondary_effect_chance = move_data.and_then(|m| m.secondary_effect).unwrap_or(0);
     let secondary_effect_happened = has_unboost_subline || has_status_subline;
 
     let pokemon_display = player_state.pokemon_display_name(&line.pokemon_nickname);
-
     let mut luck_events = Vec::new();
 
     if !has_miss_subline && secondary_effect_chance > 0 && secondary_effect_chance < 100 {

@@ -66,6 +66,15 @@ fn handle_paralysis(state: &mut GameState, line: &MainLine, current_turn: u32) {
     }
 }
 
+fn handle_sleep(state: &mut GameState, line: &MainLine) {
+    if let Some(player_state) = state.get_player_state_mut(&line.player) {
+        if let Some(active_mon_state) = player_state.get_active_pokemon_state_mut() {
+            active_mon_state.increment_status_turns();
+        }
+    }
+
+}
+
 pub fn handle_cant(state: &mut GameState, line: &MainLine) {
     let current_turn = state.turn;
     let reason = line.reason.as_deref().unwrap_or_default();
@@ -73,6 +82,7 @@ pub fn handle_cant(state: &mut GameState, line: &MainLine) {
     match reason {
         "flinch" => handle_flinch(state, line, current_turn),
         "par" => handle_paralysis(state, line, current_turn),
+        "slp" => handle_sleep(state, line),
         _ => {}
     }
 }

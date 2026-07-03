@@ -23,6 +23,7 @@ fn parse_line(line: &str) -> Line {
         "faint" => Line::Main(MainLine::from_faint(line)),
         "detailschange" | "-formechange" => Line::Main(MainLine::from_detailschange(line)),
         "cant" | "-cant" => Line::Main(MainLine::from_cant(line)),
+        "-curestatus" => Line::Main(MainLine::from_curestatus(line)),
 
         // Info lines
         "turn" => Line::Info(InfoLine::from_turn(line)),

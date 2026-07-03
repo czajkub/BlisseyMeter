@@ -5,6 +5,7 @@ pub enum MainLineType {
     Faint,
     DetailsChange,
     Cant,
+    CureStatus,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -19,7 +20,7 @@ pub enum SubLineType {
     Immune,
 
     // Luck factors
-    Crit,    
+    Crit,
     Miss,
     Status,
 

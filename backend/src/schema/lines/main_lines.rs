@@ -142,6 +142,28 @@ impl MainLine {
         }
     }
 
+    pub fn from_curestatus(line: &str) -> Self {
+        let mut split = line.split('|');
+        split.next();
+        split.next(); // skip "-curestatus"
+        let (player, pokemon_nickname) = extract_pokemon(split.next().unwrap_or_default());
+        let status = split.next().unwrap_or_default().trim().to_string();
+
+        MainLine {
+            line_type: MainLineType::CureStatus,
+            player,
+            pokemon_nickname,
+            species: None,
+            pokemon_current_hp: None,
+            pokemon_max_hp: None,
+            move_name: None,
+            target_player: None,
+            target_pokemon_nickname: None,
+            reason: Some(status),
+            sublines: Vec::new(),
+        }
+    }
+
     pub fn from_cant(line: &str) -> Self {
         let mut split = line.split('|');
         split.next();
