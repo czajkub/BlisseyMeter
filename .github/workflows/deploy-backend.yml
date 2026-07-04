@@ -1,0 +1,28 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths: [backend/**]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - run: cargo install cargo-lambda
+
+      - run: cargo lambda build --release --arm64
+        working-directory: backend
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - run: cargo lambda deploy replayAnalysis --binary-name bootstrap --role ${{ secrets.LAMBDA_ROLE_ARN }} --env-var FRONTEND_URL=${{ secrets.FRONTEND_URL }} --merge-env
+        working-directory: backend
