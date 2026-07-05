@@ -24,7 +24,7 @@ jobs:
 
       - run: cargo binstall --no-confirm cargo-lambda
 
-      - run: cargo lambda build --release --arm64
+      - run: cargo lambda build --release
         working-directory: backend
 
       - uses: aws-actions/configure-aws-credentials@v4
