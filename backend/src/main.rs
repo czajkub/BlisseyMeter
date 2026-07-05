@@ -24,9 +24,16 @@ use fetch::fetch_replay;
 use analyze::analyze;
 
 #[derive(Serialize)]
+struct PlayerData {
+    name: String,
+    avatar: String,
+    events: Vec<LuckEvent>,
+}
+
+#[derive(Serialize)]
 struct AnalyzeResponse {
-    p1_luck_events: Vec<LuckEvent>,
-    p2_luck_events: Vec<LuckEvent>,
+    p1: PlayerData,
+    p2: PlayerData,
 }
 
 async fn index() -> &'static str {
@@ -36,16 +43,21 @@ async fn index() -> &'static str {
 async fn analyze_replay(body: String) -> impl IntoResponse {
     let lines = fetch_replay(&body).await.unwrap_or_default();
     let game_state = analyze(lines).await;
-    
+
     let response_data = AnalyzeResponse {
-        p1_luck_events: game_state.p1.luck_events,
-        p2_luck_events: game_state.p2.luck_events,
+        p1: PlayerData {
+            name: game_state.p1.name.clone(),
+            avatar: game_state.p1.avatar.clone(),
+            events: game_state.p1.luck_events,
+        },
+        p2: PlayerData {
+            name: game_state.p2.name.clone(),
+            avatar: game_state.p2.avatar.clone(),
+            events: game_state.p2.luck_events,
+        },
     };
 
-    (
-        StatusCode::OK,
-        Json(response_data)
-    )
+    (StatusCode::OK, Json(response_data))
 }
 
 #[tokio::main]

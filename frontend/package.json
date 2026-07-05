@@ -24,7 +24,6 @@
 		"wrangler": "^4.103.0"
 	},
 	"dependencies": {
-		"chart.js": "^4.5.1",
-		"pokemon-sprites": "github:PokeAPI/sprites"
+		"chart.js": "^4.5.1"
 	}
 }

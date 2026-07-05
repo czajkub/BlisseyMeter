@@ -7,6 +7,8 @@ pub struct InfoLine {
     pub player: Option<String>,
     pub poke: Option<String>,
     pub gender: Option<String>,
+    pub player_nick: Option<String>,
+    pub avatar: Option<String>,
 }
 
 impl InfoLine {
@@ -22,6 +24,8 @@ impl InfoLine {
             player: None,
             poke: None,
             gender: None,
+            player_nick: None,
+            avatar: None,
         }
     }
 
@@ -40,6 +44,30 @@ impl InfoLine {
             player: Some(player),
             poke: Some(poke),
             gender: Some(gender),
+            player_nick: None,
+            avatar: None,
+        }
+    }
+
+    pub fn from_player(line: &str) -> Self {
+        let mut split = line.split('|');
+        split.next();
+        split.next(); // skip "player"
+        let take = |it: &mut std::str::Split<'_, char>| -> Option<String> {
+            it.next().filter(|s| !s.is_empty()).map(str::to_string)
+        };
+        let player = take(&mut split);
+        let player_nick = take(&mut split);
+        let player_avatar = take(&mut split);
+
+        InfoLine {
+            line_type: InfoLineType::Player,
+            turn: None,
+            player,
+            poke: None,
+            gender: None,
+            player_nick,
+            avatar: player_avatar,
         }
     }
 }

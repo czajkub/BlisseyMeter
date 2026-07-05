@@ -1,124 +1,205 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import Chart from 'chart.js/auto';
 
 	type LuckEvent = {
 		turn: number;
-		pokemon: string;
-		category: string;
 		score: number;
-		description: string;
-		source_move: string;
 		is_beneficial: boolean;
 	};
 
-	type AnalysisResult = {
-		p1_luck_events: LuckEvent[];
-		p2_luck_events: LuckEvent[];
-	};
-
-	let { result }: { result: AnalysisResult } = $props();
+	let {
+		p1Events,
+		p2Events,
+		p1Name = 'Player 1',
+		p2Name = 'Player 2'
+	}: {
+		p1Events: LuckEvent[];
+		p2Events: LuckEvent[];
+		p1Name?: string;
+		p2Name?: string;
+	} = $props();
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
 
-	// Whenever the result changes, update the chart
 	$effect(() => {
-		if (result && canvas) {
-			updateChart();
-		}
+		void p1Events;
+		void p2Events;
+		void p1Name;
+		void p2Name;
+		if (canvas) updateChart();
 	});
 
 	onDestroy(() => {
-		if (chart) {
-			chart.destroy();
-		}
+		chart?.destroy();
 	});
 
-	function updateChart() {
-		// Calculate the max turn
-		let maxTurn = 0;
-		const allEvents = [...result.p1_luck_events, ...result.p2_luck_events];
-		for (const event of allEvents) {
-			if (event.turn > maxTurn) {
-				maxTurn = event.turn;
-			}
-		}
+	const COLORS = {
+		p1: { line: '#3b82f6', fill: 'rgba(59, 130, 246, 0.12)' },
+		p2: { line: '#ef4444', fill: 'rgba(239, 68, 68, 0.12)' },
+		net: '#10b981'
+	};
 
-		// Ensure we show at least up to turn 1 even if no events
+	function makeGradient(ctx: CanvasRenderingContext2D, color: string): CanvasGradient {
+		const gradient = ctx.createLinearGradient(0, 0, 0, 340);
+		gradient.addColorStop(0, color.replace('0.12', '0.28'));
+		gradient.addColorStop(1, color.replace('0.12', '0'));
+		return gradient;
+	}
+
+	function buildData() {
+		let maxTurn = 0;
+		for (const e of [...p1Events, ...p2Events]) {
+			if (e.turn > maxTurn) maxTurn = e.turn;
+		}
 		maxTurn = Math.max(1, maxTurn);
 
 		const labels = Array.from({ length: maxTurn + 1 }, (_, i) => i.toString());
+		const p1Data = cumulative(p1Events, maxTurn);
+		const p2Data = cumulative(p2Events, maxTurn);
+		const netData = p1Data.map((v, i) => v - p2Data[i]);
+		return { labels, p1Data, p2Data, netData, maxTurn };
+	}
 
-		const p1Data = calculateCumulativeLuck(result.p1_luck_events, maxTurn);
-		const p2Data = calculateCumulativeLuck(result.p2_luck_events, maxTurn);
-		
-		// Net luck difference (Player 1 - Player 2)
-		const netData = p1Data.map((p1Val, index) => p1Val - p2Data[index]);
+	function eventMarkers(events: LuckEvent[], color: string, maxTurn: number) {
+		return events.map((e) => ({
+			type: 'point' as const,
+			data: { x: e.turn, y: cumulativeAt(events, e.turn) },
+			properties: { r: 4, borderColor: color, backgroundColor: color }
+		}));
+	}
+
+	function cumulativeAt(events: LuckEvent[], turn: number): number {
+		let total = 0;
+		for (const e of events) {
+			if (e.turn <= turn) total += e.is_beneficial ? e.score : -e.score;
+		}
+		return total;
+	}
+
+	function updateChart() {
+		const { labels, p1Data, p2Data, netData, maxTurn } = buildData();
+		const ctx = canvas.getContext('2d');
 
 		if (chart) {
 			chart.data.labels = labels;
 			chart.data.datasets[0].data = p1Data;
+			chart.data.datasets[0].label = `${p1Name} Luck`;
 			chart.data.datasets[1].data = p2Data;
+			chart.data.datasets[1].label = `${p2Name} Luck`;
 			chart.data.datasets[2].data = netData;
 			chart.update();
-		} else {
+		} else if (ctx) {
 			chart = new Chart(canvas, {
 				type: 'line',
 				data: {
 					labels,
 					datasets: [
 						{
-							label: 'Player 1 Luck',
+							label: `${p1Name} Luck`,
 							data: p1Data,
-							borderColor: 'rgba(54, 162, 235, 1)',
-							backgroundColor: 'rgba(54, 162, 235, 0.1)',
-							tension: 0.1,
-							fill: true
+							borderColor: COLORS.p1.line,
+							backgroundColor: makeGradient(ctx, COLORS.p1.fill),
+							tension: 0.3,
+							fill: true,
+							pointRadius: 0,
+							pointHoverRadius: 6,
+							pointHoverBackgroundColor: COLORS.p1.line,
+							pointHoverBorderColor: '#fff',
+							pointHoverBorderWidth: 2,
+							borderWidth: 2.5
 						},
 						{
-							label: 'Player 2 Luck',
+							label: `${p2Name} Luck`,
 							data: p2Data,
-							borderColor: 'rgba(255, 99, 132, 1)',
-							backgroundColor: 'rgba(255, 99, 132, 0.1)',
-							tension: 0.1,
-							fill: true
+							borderColor: COLORS.p2.line,
+							backgroundColor: makeGradient(ctx, COLORS.p2.fill),
+							tension: 0.3,
+							fill: true,
+							pointRadius: 0,
+							pointHoverRadius: 6,
+							pointHoverBackgroundColor: COLORS.p2.line,
+							pointHoverBorderColor: '#fff',
+							pointHoverBorderWidth: 2,
+							borderWidth: 2.5
 						},
 						{
-							label: 'Net Luck (P1 - P2)',
+							label: 'Net Luck',
 							data: netData,
-							borderColor: 'rgba(75, 192, 192, 1)',
+							borderColor: COLORS.net,
 							backgroundColor: 'transparent',
-							borderWidth: 3,
-							borderDash: [5, 5],
-							tension: 0.1,
-							fill: false
+							borderWidth: 2,
+							borderDash: [6, 4],
+							tension: 0.3,
+							fill: false,
+							pointRadius: 0,
+							pointHoverRadius: 5,
+							pointHoverBackgroundColor: COLORS.net,
+							pointHoverBorderColor: '#fff',
+							pointHoverBorderWidth: 2
 						}
 					]
 				},
 				options: {
 					responsive: true,
 					maintainAspectRatio: false,
+					interaction: { mode: 'index', intersect: false },
+					animation: { duration: 600, easing: 'easeOutQuart' },
 					scales: {
 						x: {
 							title: {
 								display: true,
-								text: 'Turn'
-							}
+								text: 'Turn',
+								color: '#4a5568',
+								font: { size: 12, weight: 'bold' as const }
+							},
+							grid: { display: false },
+							border: { display: false },
+							ticks: { color: '#a0aec0', font: { size: 11 } }
 						},
 						y: {
 							title: {
 								display: true,
-								text: 'Cumulative Luck Score'
-							}
+								text: 'Cumulative Luck Score',
+								color: '#4a5568',
+								font: { size: 12, weight: 'bold' as const }
+							},
+							grid: { color: 'rgba(0, 0, 0, 0.05)' },
+							border: { display: false },
+							ticks: { color: '#a0aec0', font: { size: 11 } }
 						}
 					},
 					plugins: {
+						legend: {
+							position: 'top',
+							align: 'end',
+							labels: {
+								usePointStyle: true,
+								pointStyle: 'circle',
+								padding: 18,
+								color: '#2d3748',
+								font: { size: 12, weight: 'bold' as const }
+							}
+						},
 						tooltip: {
+							backgroundColor: 'rgba(26, 32, 44, 0.92)',
+							titleColor: '#fff',
+							bodyColor: '#e2e8f0',
+							borderColor: 'rgba(255, 255, 255, 0.1)',
+							borderWidth: 1,
+							padding: 12,
+							cornerRadius: 8,
+							displayColors: true,
+							boxPadding: 6,
+							titleFont: { size: 13, weight: 'bold' as const },
+							bodyFont: { size: 12 },
 							callbacks: {
-								label: function(context) {
-									const yValue = context.parsed.y !== null && context.parsed.y !== undefined ? context.parsed.y : 0;
-									return `${context.dataset.label}: ${yValue.toFixed(2)}`;
+								title: (items) => `Turn ${items[0].label}`,
+								label: (ctx) => {
+									const y = ctx.parsed.y ?? 0;
+									const sign = y > 0 ? '+' : '';
+									return `  ${ctx.dataset.label}: ${sign}${y.toFixed(2)}`;
 								}
 							}
 						}
@@ -128,40 +209,63 @@
 		}
 	}
 
-	function calculateCumulativeLuck(events: LuckEvent[], maxTurn: number): number[] {
+	function cumulative(events: LuckEvent[], maxTurn: number): number[] {
 		const data: number[] = new Array(maxTurn + 1).fill(0);
-		
-		// Map scores per turn
-		const scoresPerTurn = new Map<number, number>();
-		for (const event of events) {
-			const impact = event.is_beneficial ? event.score : -event.score;
-			scoresPerTurn.set(event.turn, (scoresPerTurn.get(event.turn) || 0) + impact);
+		const perTurn = new Map<number, number>();
+		for (const e of events) {
+			const impact = e.is_beneficial ? e.score : -e.score;
+			perTurn.set(e.turn, (perTurn.get(e.turn) ?? 0) + impact);
 		}
-
 		let cumulative = 0;
 		for (let i = 0; i <= maxTurn; i++) {
-			cumulative += scoresPerTurn.get(i) || 0;
+			cumulative += perTurn.get(i) ?? 0;
 			data[i] = cumulative;
 		}
-
 		return data;
 	}
 </script>
 
-<div class="chart-container">
-	<canvas bind:this={canvas}></canvas>
+<div class="chart-card">
+	<div class="chart-header">
+		<h3>Cumulative Luck Over Time</h3>
+		<p class="chart-sub">Net luck difference (dashed) = {p1Name} − {p2Name}</p>
+	</div>
+	<div class="chart-container">
+		<canvas bind:this={canvas}></canvas>
+	</div>
 </div>
 
 <style>
+	.chart-card {
+		background: white;
+		border-radius: 12px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+		margin-bottom: 1.5rem;
+		overflow: hidden;
+	}
+
+	.chart-header {
+		padding: 1.25rem 1.5rem 0.5rem 1.5rem;
+	}
+
+	.chart-header h3 {
+		margin: 0 0 0.25rem 0;
+		font-size: 1rem;
+		font-weight: 700;
+		color: #1a202c;
+	}
+
+	.chart-sub {
+		margin: 0;
+		font-size: 0.8rem;
+		color: #a0aec0;
+	}
+
 	.chart-container {
 		position: relative;
-		height: 400px;
+		height: 380px;
 		width: 100%;
-		background: white;
-		padding: 1.5rem;
-		border-radius: 8px;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-		margin-bottom: 2rem;
+		padding: 0.5rem 1.5rem 1.5rem 1.5rem;
 		box-sizing: border-box;
 	}
 </style>

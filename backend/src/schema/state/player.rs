@@ -2,13 +2,27 @@ use std::collections::HashMap;
 
 use super::{LuckEvent, PokemonState};
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct PlayerState {
     pub name: String,
     pub active_pokemon: Option<String>,
     pub team: HashMap<String, PokemonState>,
     pub luck_events: Vec<LuckEvent>,
     pub total_luck_score: f64,
+    pub avatar: String,
+}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        Self {
+            name: "unknown".into(),
+            avatar: "default".into(),
+            active_pokemon: None,
+            team: HashMap::new(),
+            luck_events: Vec::new(),
+            total_luck_score: 0.0,
+        }
+    }
 }
 
 impl PlayerState {

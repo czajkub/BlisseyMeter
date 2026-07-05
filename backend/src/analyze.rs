@@ -27,6 +27,8 @@ fn parse_line(line: &str) -> Line {
 
         // Info lines
         "turn" => Line::Info(InfoLine::from_turn(line)),
+        "poke" => Line::Info(InfoLine::from_poke(line)),
+        "player" => Line::Info(InfoLine::from_player(line)),
 
         // Sub lines - HP changes
         "-damage" => Line::Sub(SubLine::from_damage(line)),
