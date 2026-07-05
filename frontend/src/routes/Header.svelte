@@ -22,7 +22,7 @@
 			</li>
 			<li>
 				<a
-					href="https://github.com/czajkub/replay-analyzer-idk-yet"
+					href="https://github.com/czajkub/BlisseyMeter"
 					target="_blank"
 					rel="noopener noreferrer"
 				>

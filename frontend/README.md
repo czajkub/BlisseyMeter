@@ -15,7 +15,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-pnpm dlx sv create --template demo --types ts --install pnpm replay-analyzer
+pnpm dlx sv create --template demo --types ts --install pnpm BlisseyMeter
 ```
 
 ## Developing

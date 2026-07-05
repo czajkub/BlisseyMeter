@@ -191,11 +191,11 @@
 </script>
 
 <svelte:head>
-	<title>Pokémon Replay Luck Analyzer</title>
+	<title>BlisseyMeter</title>
 </svelte:head>
 
 <main class="container">
-	<h1>Pokémon Replay Luck Analyzer</h1>
+	<h1>BlisseyMeter</h1>
 	
 	<div class="form-container">
 		<input 
