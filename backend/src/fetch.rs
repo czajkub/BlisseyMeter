@@ -1,5 +1,14 @@
+const ALLOWED_PREFIX: &str = "https://replay.pokemonshowdown.com/";
+
 pub async fn fetch_replay(replay_url: &str) -> Result<Vec<String>, String> {
-    let response = reqwest::get(replay_url)
+    let url = replay_url.trim();
+    if !url.starts_with(ALLOWED_PREFIX) {
+        return Err(format!(
+            "Invalid replay URL: only {ALLOWED_PREFIX}... links are supported"
+        ));
+    }
+
+    let response = reqwest::get(url)
         .await
         .map_err(|e| format!("Failed to fetch URL: {e}"))?;
 

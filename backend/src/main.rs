@@ -57,8 +57,10 @@ async fn analyze_lines(lines: Vec<String>) -> AnalyzeResponse {
 }
 
 async fn analyze_replay(body: String) -> impl IntoResponse {
-    let lines = fetch_replay(&body).await.unwrap_or_default();
-    (StatusCode::OK, Json(analyze_lines(lines).await))
+    match fetch_replay(&body).await {
+        Ok(lines) => (StatusCode::OK, Json(analyze_lines(lines).await)).into_response(),
+        Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
+    }
 }
 
 async fn analyze_raw(body: String) -> impl IntoResponse {

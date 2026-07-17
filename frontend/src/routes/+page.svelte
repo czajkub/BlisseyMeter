@@ -160,13 +160,28 @@
 	const scoreLabel = (score: number) => (score > 0 ? `+${score}` : `${score}`);
 
 	function toLogUrl(url: string): string {
-		// Strip any trailing slash, then append .log unless it's already there.
-		const trimmed = url.trim().replace(/\/+$/, '');
+		// Strip trailing slashes and add https:// if no scheme was given.
+		let trimmed = url.trim().replace(/\/+$/, '');
+		if (!/^https?:\/\//i.test(trimmed)) trimmed = `https://${trimmed}`;
 		if (/\.log(\?|$)/i.test(trimmed)) return trimmed;
 		// Split off query string so we can append .log before it.
 		const qIdx = trimmed.indexOf('?');
 		if (qIdx === -1) return `${trimmed}.log`;
 		return `${trimmed.slice(0, qIdx)}.log${trimmed.slice(qIdx)}`;
+	}
+
+	function replayFetchError(status: number): string {
+		if (status === 404) return 'Replay not found — double-check the URL.';
+		return `Failed to fetch the replay from Showdown (HTTP ${status}).`;
+	}
+
+	function apiError(status: number): string {
+		if (status === 400) return 'The server could not parse that replay log.';
+		if (status === 500)
+			return 'Something broke on the analysis server — please contact the dev.';
+		if (status === 502 || status === 503 || status === 504)
+			return 'The analysis server is unavailable right now — try again later.';
+		return `Analysis failed (HTTP ${status}).`;
 	}
 
 	async function analyzeReplay() {
@@ -181,24 +196,35 @@
 			// 1. Fetch the replay .log from Showdown directly in the browser,
 			//    saving the Lambda from having to do it.
 			const logUrl = toLogUrl(replayUrl);
-			const logResp = await fetch(logUrl);
-			if (!logResp.ok) {
-				throw new Error(`Failed to fetch replay: ${logResp.status} ${logResp.statusText}`);
+			let logText: string;
+			try {
+				const logResp = await fetch(logUrl);
+				if (!logResp.ok) throw new Error(replayFetchError(logResp.status));
+				logText = await logResp.text();
+			} catch (e: any) {
+				// fetch() itself throws TypeError on network failure / bad host.
+				if (e instanceof TypeError)
+					throw new Error("Couldn't reach replay.pokemonshowdown.com — check the URL and your connection.");
+				throw e;
 			}
-			const logText = await logResp.text();
 
 			// 2. Send the raw log text to the analysis API.
 			const apiUrl = PUBLIC_API_URL || 'http://localhost:8080';
-			const response = await fetch(`${apiUrl}/analyze-raw`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'text/plain'
-				},
-				body: logText
-			});
+			let response: Response;
+			try {
+				response = await fetch(`${apiUrl}/analyze-raw`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'text/plain'
+					},
+					body: logText
+				});
+			} catch {
+				throw new Error("Couldn't reach the analysis server — try again later.");
+			}
 
 			if (!response.ok) {
-				throw new Error(`Error: ${response.status} ${response.statusText}`);
+				throw new Error(apiError(response.status));
 			}
 
 			result = await response.json();
