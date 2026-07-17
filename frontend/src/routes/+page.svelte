@@ -159,22 +159,42 @@
 
 	const scoreLabel = (score: number) => (score > 0 ? `+${score}` : `${score}`);
 
+	function toLogUrl(url: string): string {
+		// Strip any trailing slash, then append .log unless it's already there.
+		const trimmed = url.trim().replace(/\/+$/, '');
+		if (/\.log(\?|$)/i.test(trimmed)) return trimmed;
+		// Split off query string so we can append .log before it.
+		const qIdx = trimmed.indexOf('?');
+		if (qIdx === -1) return `${trimmed}.log`;
+		return `${trimmed.slice(0, qIdx)}.log${trimmed.slice(qIdx)}`;
+	}
+
 	async function analyzeReplay() {
 		if (!replayUrl) return;
-		
+
 		loading = true;
 		error = null;
 		result = null;
 		resetFilterStateOnNewAnalysis();
 
 		try {
+			// 1. Fetch the replay .log from Showdown directly in the browser,
+			//    saving the Lambda from having to do it.
+			const logUrl = toLogUrl(replayUrl);
+			const logResp = await fetch(logUrl);
+			if (!logResp.ok) {
+				throw new Error(`Failed to fetch replay: ${logResp.status} ${logResp.statusText}`);
+			}
+			const logText = await logResp.text();
+
+			// 2. Send the raw log text to the analysis API.
 			const apiUrl = PUBLIC_API_URL || 'http://localhost:8080';
-			const response = await fetch(`${apiUrl}/analyze`, {
+			const response = await fetch(`${apiUrl}/analyze-raw`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'text/plain'
 				},
-				body: replayUrl
+				body: logText
 			});
 
 			if (!response.ok) {
@@ -212,6 +232,23 @@
 	{#if error}
 		<div class="error">
 			{error}
+		</div>
+	{/if}
+
+	{#if !result && !loading}
+		<section class="hero">
+			<p>
+				Paste a Pokémon Showdown replay link above to see a breakdown of the luck in the
+				game — critical hits, misses, secondary effects, flinches, paralysis and sleep turns —
+				and which player it favored.
+			</p>
+		</section>
+	{/if}
+
+	{#if loading}
+		<div class="loading">
+			<div class="spinner"></div>
+			<p>Fetching replay and analyzing luck…</p>
 		</div>
 	{/if}
 
@@ -382,7 +419,7 @@
 	.form-container {
 		display: flex;
 		gap: 1rem;
-		max-width: 800px;
+		width: 100%;
 		margin: 0 auto 3rem auto;
 	}
 
@@ -428,6 +465,46 @@
 		border-radius: 6px;
 		text-align: center;
 		margin-bottom: 2rem;
+	}
+
+	.hero {
+		background: white;
+		border-radius: 12px;
+		padding: 2rem;
+		text-align: center;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+		margin-bottom: 2rem;
+	}
+
+	.hero p {
+		color: #4a5568;
+		line-height: 1.6;
+		max-width: 640px;
+		margin: 0 auto;
+	}
+
+	.loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		padding: 3rem 0;
+		color: #4a5568;
+	}
+
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #e2e8f0;
+		border-top-color: #4299e1;
+		border-radius: 50%;
+		animation: spin 0.9s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.filter-bar {

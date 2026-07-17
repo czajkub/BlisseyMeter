@@ -40,11 +40,9 @@ async fn index() -> &'static str {
     "Hello, world!\n"
 }
 
-async fn analyze_replay(body: String) -> impl IntoResponse {
-    let lines = fetch_replay(&body).await.unwrap_or_default();
+async fn analyze_lines(lines: Vec<String>) -> AnalyzeResponse {
     let game_state = analyze(lines).await;
-
-    let response_data = AnalyzeResponse {
+    AnalyzeResponse {
         p1: PlayerData {
             name: game_state.p1.name.clone(),
             avatar: game_state.p1.avatar.clone(),
@@ -55,9 +53,17 @@ async fn analyze_replay(body: String) -> impl IntoResponse {
             avatar: game_state.p2.avatar.clone(),
             events: game_state.p2.luck_events,
         },
-    };
+    }
+}
 
-    (StatusCode::OK, Json(response_data))
+async fn analyze_replay(body: String) -> impl IntoResponse {
+    let lines = fetch_replay(&body).await.unwrap_or_default();
+    (StatusCode::OK, Json(analyze_lines(lines).await))
+}
+
+async fn analyze_raw(body: String) -> impl IntoResponse {
+    let lines: Vec<String> = body.split('\n').map(|s| s.to_string()).collect();
+    (StatusCode::OK, Json(analyze_lines(lines).await))
 }
 
 #[tokio::main]
@@ -75,6 +81,7 @@ async fn main() -> Result<(), Error> {
     let app = Router::new()
         .route("/", get(index))
         .route("/analyze", post(analyze_replay))
+        .route("/analyze-raw", post(analyze_raw))
         .layer(cors);
 
     let is_lambda = env::var("AWS_LAMBDA_RUNTIME_API").is_ok() || env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok();
