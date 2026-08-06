@@ -23,6 +23,8 @@
 		is_beneficial: boolean;
 	};
 
+	const MINOR_EVENT_THRESHOLD = 0.1;
+
 	type PlayerData = {
 		name: string;
 		avatar: string;
@@ -47,6 +49,7 @@
 	let hiddenCategories = $state<Set<string>>(new Set());
 	let hiddenPokemon = $state<Set<string>>(new Set());
 	let disabledEvents = $state<Set<string>>(new Set());
+	let expandedMinor = $state<Set<string>>(new Set());
 	let sortMode = $state<SortMode>('turn');
 
 	function eventKey(e: LuckEvent): string {
@@ -73,6 +76,13 @@
 		if (next.has(p)) next.delete(p);
 		else next.add(p);
 		hiddenPokemon = next;
+	}
+
+	function toggleMinor(playerKey: string) {
+		const next = new Set(expandedMinor);
+		if (next.has(playerKey)) next.delete(playerKey);
+		else next.add(playerKey);
+		expandedMinor = next;
 	}
 
 	function resetFilters() {
@@ -151,13 +161,17 @@
 		hiddenCategories = new Set();
 		hiddenPokemon = new Set();
 		disabledEvents = new Set();
+		expandedMinor = new Set();
 		sortMode = 'turn';
 	}
 
 	const scoreColor = (score: number) =>
 		score > 0 ? '#38a169' : score < 0 ? '#e53e3e' : '#718096';
 
-	const scoreLabel = (score: number) => (score > 0 ? `+${score}` : `${score}`);
+	const scoreLabel = (score: number) => {
+		const rounded = Math.round(score * 100) / 100;
+		return rounded > 0 ? `+${rounded}` : `${rounded}`;
+	};
 
 	function toLogUrl(url: string): string {
 		// Strip trailing slashes and add https:// if no scheme was given.
@@ -353,6 +367,8 @@
 </main>
 
 {#snippet playerColumn(name: string, avatar: string, events: LuckEvent[])}
+	{@const major = events.filter((e) => Math.abs(e.score) > MINOR_EVENT_THRESHOLD)}
+	{@const minor = events.filter((e) => Math.abs(e.score) <= MINOR_EVENT_THRESHOLD)}
 	<section class="player-column">
 		<header class="player-header">
 			<img
@@ -371,54 +387,86 @@
 		{#if events.length === 0}
 			<p class="empty">No luck events found.</p>
 		{:else}
-			<div class="event-list">
-				{#each events as event}
-					{@const disabled = disabledEvents.has(eventKey(event))}
-					<button
-						type="button"
-						class="event {event.is_beneficial ? 'beneficial' : 'detrimental'}"
-						class:disabled
-						onclick={() => toggleEvent(event)}
-						title={disabled ? 'Click to include in chart' : 'Click to exclude from chart'}
-						aria-pressed={disabled}
-					>
-						<div class="event-marker"></div>
-						<div class="event-body">
-							<div class="event-top">
-								<img
-									src={getPokemonSpriteUrl(event.pokemon)}
-									alt={event.pokemon}
-									class="poke-sprite"
-									onerror={(e) => {
-										const img = e.currentTarget as HTMLImageElement;
-										const next =
-											img.src === getPokemonSpriteUrl(event.pokemon)
-												? getPokemonStaticSpriteUrl(event.pokemon)
-												: POKEMON_FALLBACK_URL;
-										if (img.src !== next) img.src = next;
-									}}
-								/>
-								<div class="event-meta">
-									<span class="pokemon">{event.pokemon}</span>
-									{#if event.source_move}
-										<span class="move">{event.source_move}</span>
-									{/if}
-								</div>
-								<span class="score-badge" style="color: {scoreColor(event.score)}">
-									{scoreLabel(event.score)}
-								</span>
-							</div>
-							<p class="description">{event.description}</p>
-							<div class="event-footer">
-								<span class="turn">Turn {event.turn}</span>
-								<span class="category">{categoryLabel(event.category)}</span>
-							</div>
-						</div>
-					</button>
-				{/each}
-			</div>
+		<div class="event-list">
+			{#each major as event}
+				{@render eventCard(event)}
+			{/each}
+			{#if minor.length > 0}
+				{@const expanded = expandedMinor.has(name)}
+				{@const net = minor.reduce((sum, e) => sum + e.score, 0)}
+				{@const firstTurn = minor[0].turn}
+				{@const lastTurn = minor[minor.length - 1].turn}
+				<button
+					type="button"
+					class="minor-toggle"
+					onclick={() => toggleMinor(name)}
+					aria-expanded={expanded}
+				>
+					<span class="minor-caret" class:expanded>▸</span>
+					<span class="minor-count">
+						{expanded ? 'Hide' : 'Show'} {minor.length} minor event{minor.length === 1 ? '' : 's'}
+					</span>
+					<span class="minor-turns">
+						{firstTurn === lastTurn ? `Turn ${firstTurn}` : `Turns ${firstTurn}–${lastTurn}`}
+					</span>
+					<span class="minor-net" style="color: {scoreColor(net)}">{scoreLabel(net)}</span>
+				</button>
+				{#if expanded}
+					<div class="minor-events">
+						{#each minor as event}
+							{@render eventCard(event)}
+						{/each}
+					</div>
+				{/if}
+			{/if}
+		</div>
 		{/if}
 	</section>
+{/snippet}
+
+{#snippet eventCard(event: LuckEvent)}
+	{@const disabled = disabledEvents.has(eventKey(event))}
+	<button
+		type="button"
+		class="event {event.is_beneficial ? 'beneficial' : 'detrimental'}"
+		class:disabled
+		onclick={() => toggleEvent(event)}
+		title={disabled ? 'Click to include in chart' : 'Click to exclude from chart'}
+		aria-pressed={disabled}
+	>
+		<div class="event-marker"></div>
+		<div class="event-body">
+			<div class="event-top">
+				<img
+					src={getPokemonSpriteUrl(event.pokemon)}
+					alt={event.pokemon}
+					class="poke-sprite"
+					onerror={(e) => {
+						const img = e.currentTarget as HTMLImageElement;
+						const next =
+							img.src === getPokemonSpriteUrl(event.pokemon)
+								? getPokemonStaticSpriteUrl(event.pokemon)
+								: POKEMON_FALLBACK_URL;
+						if (img.src !== next) img.src = next;
+					}}
+				/>
+				<div class="event-meta">
+					<span class="pokemon">{event.pokemon}</span>
+					{#if event.source_move}
+						<span class="move">{event.source_move}</span>
+					{/if}
+				</div>
+				<span class="score-badge" style="color: {scoreColor(event.score)}">
+					{scoreLabel(event.score)}
+				</span>
+			</div>
+			<p class="description">{event.description}</p>
+			<div class="event-footer">
+				<span class="turn">Turn {event.turn}</span>
+				<span class="category">{categoryLabel(event.category)}</span>
+			</div>
+		</div>
+	</button>
 {/snippet}
 
 <style>
@@ -713,6 +761,59 @@
 		list-style: none;
 		padding: 0.75rem;
 		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.6rem;
+	}
+
+	.minor-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.55rem 0.9rem;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: #718096;
+		background: #f7fafc;
+		border: 1px dashed #cbd5e0;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+
+	.minor-toggle:hover:not(:disabled) {
+		background: #edf2f7;
+		color: #4a5568;
+	}
+
+	.minor-caret {
+		display: inline-block;
+		transition: transform 0.15s ease;
+	}
+
+	.minor-caret.expanded {
+		transform: rotate(90deg);
+	}
+
+	.minor-count {
+		flex: 1;
+		text-align: left;
+	}
+
+	.minor-turns {
+		font-size: 0.72rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #a0aec0;
+	}
+
+	.minor-net {
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.minor-events {
 		display: flex;
 		flex-direction: column;
 		gap: 0.6rem;
