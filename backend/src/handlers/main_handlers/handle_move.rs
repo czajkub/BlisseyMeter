@@ -1,8 +1,7 @@
-use tokio::time::Sleep;
-
 use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
+use crate::handlers::sub_handlers::handle_boost;
 use crate::handlers::sub_handlers::handle_status::handle_status;
 use crate::schema::lines::line_types::SubLineType;
 use crate::schema::lines::main_lines::MainLine;
@@ -68,13 +67,16 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
     check_preconditions(state, line, current_turn);
 
     let mut has_miss_subline = false;
-    let mut has_unboost_subline = false;
+    let mut has_boost_subline = false;
     let mut has_status_subline = false;
 
     for subline in &line.sublines {
         match subline.line_type {
             SubLineType::Miss => has_miss_subline = true,
-            SubLineType::Unboost => has_unboost_subline = true,
+            SubLineType::Unboost  | SubLineType::Boost => {
+                has_boost_subline = true;
+                handle_boost(state, subline);
+            },
             SubLineType::Status => {
                 has_status_subline = true;
                 handle_status(state, subline);
@@ -93,7 +95,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
     let move_accuracy = move_data.map_or(100, |m| m.get_accuracy());
 
     let secondary_effect_chance = move_data.and_then(|m| m.secondary_effect).unwrap_or(0);
-    let secondary_effect_happened = has_unboost_subline || has_status_subline;
+    let secondary_effect_happened = has_boost_subline || has_status_subline;
 
     let pokemon_display = player_state.pokemon_display_name(&line.pokemon_nickname);
     let mut luck_events = Vec::new();
@@ -136,7 +138,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     is_beneficial: false,
                 });
             }
-            SubLineType::Unboost | SubLineType::Status => {
+            SubLineType::Unboost | SubLineType::Boost | SubLineType::Status => {
                 if secondary_effect_chance == 100 || secondary_effect_chance == 0 {
                     continue;
                 }
@@ -145,7 +147,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     pokemon: pokemon_display.clone(),
                     category: LuckCategory::SecondaryEffect,
                     score: SECONDARY_EFFECT_WEIGHT * ((100.0 - secondary_effect_chance as f64) / 100.0),
-                    description: format!("Secondary effect activated ({secondary_effect_chance}% chance)"),
+                    description: format!("Secondary effect activated - {secondary_effect_chance}% chance"),
                     source_move: line.move_name.clone(),
                     is_beneficial: true,
                 });

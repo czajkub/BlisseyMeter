@@ -1,13 +1,7 @@
-mod fetch;
-mod analyze;
-mod handlers;
-mod schema;
-mod constants;
-
 use std::env;
 use dotenv::dotenv;
 use serde::Serialize;
-use schema::state::LuckEvent;
+use backend::schema::state::LuckEvent;
 
 use axum::{
     routing::{get, post},
@@ -20,8 +14,8 @@ use tower_http::cors::{CorsLayer, Any};
 use lambda_http::{run, Error};
 use tokio::net::TcpListener;
 
-use fetch::fetch_replay;
-use analyze::analyze;
+use backend::fetch::fetch_replay;
+use backend::analyze::analyze;
 
 #[derive(Serialize)]
 struct PlayerData {

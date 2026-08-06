@@ -15,7 +15,7 @@ pub struct SubLine {
 
     // Stat change fields (-boost, -unboost)
     pub stat: Option<String>,
-    pub amount: Option<u8>,
+    pub amount: Option<i8>,
 
     // Item fields (-enditem)
     pub item: Option<String>,
@@ -143,7 +143,7 @@ impl SubLine {
             .next()
             .unwrap_or("0")
             .trim()
-            .parse::<u8>()
+            .parse::<i8>()
             .unwrap_or(0);
 
         let line_type = if is_boost {
