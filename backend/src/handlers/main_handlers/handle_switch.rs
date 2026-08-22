@@ -1,13 +1,20 @@
-use crate::schema::lines::main_lines::MainLine;
+use crate::schema::lines::{MainLine, MainLineKind};
 use crate::schema::state::{GameState, PokemonState};
 
 pub fn handle_switch(state: &mut GameState, line: &MainLine) {
-    let Some(player_state) = state.get_player_state_mut(&line.player) else {
-        panic!("Invalid player: {}", line.player);
+    let MainLineKind::Switch {
+        source_pokemon,
+        species,
+        hp,
+    } = &line.kind
+    else {
+        return;
+    };
+    let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {
+        return;
     };
 
-    let nickname = &line.pokemon_nickname;
-    let species = line.species.as_deref().unwrap_or("");
+    let nickname = &source_pokemon.pokemon_nickname;
 
     player_state.active_pokemon = Some(nickname.clone());
 
@@ -16,20 +23,15 @@ pub fn handle_switch(state: &mut GameState, line: &MainLine) {
     }
 
     if let Some(pokemon) = player_state.team.get_mut(nickname) {
-        pokemon.current_hp = line.pokemon_current_hp.unwrap_or(pokemon.current_hp);
-        pokemon.max_hp = line.pokemon_max_hp.unwrap_or(pokemon.max_hp);
+        pokemon.current_hp = hp.current;
+        pokemon.max_hp = hp.max;
         if pokemon.species.is_empty() && !species.is_empty() {
-            pokemon.species = species.to_string();
+            pokemon.species = species.clone();
         }
     } else {
         player_state.team.insert(
             nickname.clone(),
-            PokemonState::new(
-                nickname.clone(),
-                species.to_string(),
-                line.pokemon_current_hp.unwrap_or(0),
-                line.pokemon_max_hp.unwrap_or(0),
-            ),
+            PokemonState::new(nickname.clone(), species.clone(), hp.current, hp.max),
         );
     }
 }

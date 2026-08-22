@@ -1,22 +1,32 @@
 use crate::constants::luck_weights::{SECONDARY_EFFECT_WEIGHT, STATUS_WEIGHT};
-use crate::schema::lines::main_lines::MainLine;
+use crate::schema::lines::{MainLine, MainLineKind};
 use crate::schema::state::{GameState, LuckCategory, LuckEvent};
 
-fn handle_flinch(state: &mut GameState, line: &MainLine, current_turn: u32) {
-     let target_display = state.get_player_state(&line.player)
-        .map(|p| p.pokemon_display_name(&line.pokemon_nickname))
-        .unwrap_or_else(|| line.pokemon_nickname.clone());
+fn handle_flinch(
+    state: &mut GameState,
+    target_player: &str,
+    target_nickname: &str,
+    source: Option<&crate::schema::lines::PokemonRef>,
+    current_turn: u32,
+) {
+    let target_display = state
+        .get_player_state(target_player)
+        .map(|player| player.pokemon_display_name(target_nickname))
+        .unwrap_or_else(|| target_nickname.to_string());
+    let attacker_display = source
+        .and_then(|pokemon| {
+            state
+                .get_opponent_state(target_player)
+                .map(|player| player.pokemon_display_name(&pokemon.pokemon_nickname))
+        })
+        .or_else(|| {
+            state
+                .get_opponent_state(target_player)
+                .map(|player| player.active_pokemon_display_name())
+        })
+        .unwrap_or_default();
 
-    let attacker_display = match &line.target_pokemon_nickname {
-        Some(nick) => state.get_opponent_state(&line.player)
-            .map(|p| p.pokemon_display_name(nick))
-            .unwrap_or_else(|| nick.clone()),
-        None => state.get_opponent_state(&line.player)
-            .map(|p| p.active_pokemon_display_name())
-            .unwrap_or_default(),
-    };
-
-    if let Some(affected_state) = state.get_player_state_mut(&line.player) {
+    if let Some(affected_state) = state.get_player_state_mut(target_player) {
         affected_state.luck_events.push(LuckEvent {
             turn: current_turn,
             pokemon: target_display.clone(),
@@ -27,12 +37,12 @@ fn handle_flinch(state: &mut GameState, line: &MainLine, current_turn: u32) {
             is_beneficial: false,
         });
 
-        if let Some(target_pokemon) = affected_state.team.get_mut(&line.pokemon_nickname) {
+        if let Some(target_pokemon) = affected_state.team.get_mut(target_nickname) {
             target_pokemon.pending_flinch_chance = None;
         }
     }
 
-    if let Some(opponent_state) = state.get_opponent_state_mut(&line.player) {
+    if let Some(opponent_state) = state.get_opponent_state_mut(target_player) {
         opponent_state.luck_events.push(LuckEvent {
             turn: current_turn,
             pokemon: attacker_display,
@@ -45,15 +55,13 @@ fn handle_flinch(state: &mut GameState, line: &MainLine, current_turn: u32) {
     }
 }
 
-
-
-fn handle_paralysis(state: &mut GameState, line: &MainLine, current_turn: u32) {
+fn handle_paralysis(state: &mut GameState, player: &str, nickname: &str, current_turn: u32) {
     let pokemon_display = state
-        .get_player_state(&line.player)
-        .map(|p| p.pokemon_display_name(&line.pokemon_nickname))
-        .unwrap_or_else(|| line.pokemon_nickname.clone());
+        .get_player_state(player)
+        .map(|state| state.pokemon_display_name(nickname))
+        .unwrap_or_else(|| nickname.to_string());
 
-    if let Some(player_state) = state.get_player_state_mut(&line.player) {
+    if let Some(player_state) = state.get_player_state_mut(player) {
         player_state.luck_events.push(LuckEvent {
             turn: current_turn,
             pokemon: pokemon_display,
@@ -66,23 +74,30 @@ fn handle_paralysis(state: &mut GameState, line: &MainLine, current_turn: u32) {
     }
 }
 
-fn handle_sleep(state: &mut GameState, line: &MainLine) {
-    if let Some(player_state) = state.get_player_state_mut(&line.player) {
-        if let Some(active_mon_state) = player_state.get_active_pokemon_state_mut() {
-            active_mon_state.increment_status_turns();
-        }
+fn handle_sleep(state: &mut GameState, player: &str) {
+    if let Some(player_state) = state.get_player_state_mut(player)
+        && let Some(active_mon_state) = player_state.get_active_pokemon_state_mut()
+    {
+        active_mon_state.increment_status_turns();
     }
-
 }
 
 pub fn handle_cant(state: &mut GameState, line: &MainLine) {
-    let current_turn = state.turn;
-    let reason = line.reason.as_deref().unwrap_or_default();
+    let MainLineKind::Cant {
+        source_pokemon,
+        reason,
+        source,
+    } = &line.kind
+    else {
+        return;
+    };
+    let player = source_pokemon.player.as_str();
+    let nickname = &source_pokemon.pokemon_nickname;
 
-    match reason {
-        "flinch" => handle_flinch(state, line, current_turn),
-        "par" => handle_paralysis(state, line, current_turn),
-        "slp" => handle_sleep(state, line),
+    match reason.as_str() {
+        "flinch" => handle_flinch(state, player, nickname, source.as_ref(), state.turn),
+        "par" => handle_paralysis(state, player, nickname, state.turn),
+        "slp" => handle_sleep(state, player),
         _ => {}
     }
 }
