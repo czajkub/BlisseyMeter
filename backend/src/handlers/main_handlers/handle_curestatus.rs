@@ -1,17 +1,28 @@
 use crate::constants::luck_weights::STATUS_WEIGHT;
-use crate::schema::lines::main_lines::MainLine;
-use crate::schema::state::{GameState, LuckCategory, LuckEvent};
-
+use crate::schema::lines::{MainLine, MainLineKind};
+use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
 pub fn handle_curestatus(state: &mut GameState, line: &MainLine) {
+    let MainLineKind::CureStatus {
+        source_pokemon,
+        cured_status,
+        ..
+    } = &line.kind
+    else {
+        return;
+    };
     let current_turn = state.turn;
-    let status_str = line.reason.as_deref().unwrap_or_default();
+    let status_str = cured_status.as_ref();
 
-    let Some(player_state) = state.get_player_state_mut(&line.player) else { return };
-    let pokemon_display = player_state.pokemon_display_name(&line.pokemon_nickname);
-    let Some(pokemon) = player_state.team.get_mut(&line.pokemon_nickname) else { return };
+    let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {
+        return;
+    };
+    let pokemon_display = player_state.pokemon_display_name(&source_pokemon.pokemon_nickname);
+    let Some(pokemon) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) else {
+        return;
+    };
 
-    if status_str == "slp" {
+    if status_str == Some(&Status::Sleep) {
         let slept_turns = pokemon.status_turns;
 
         if slept_turns == 0 {
