@@ -9,8 +9,14 @@ pub use handle_player::handle_player;
 
 pub fn handle_info_line(state: &mut GameState, line: &InfoLine) {
     match line {
-        InfoLine::Poke { .. } => handle_poke(state, line),
-        InfoLine::Player { .. } => handle_player(state, line),
+        InfoLine::Poke {
+            player, species, ..
+        } => handle_poke(state, player, species),
+        InfoLine::Player {
+            player,
+            name,
+            avatar,
+        } => handle_player(state, player.as_deref(), name.as_deref(), avatar.as_deref()),
         InfoLine::Turn { .. } => {}
     }
 }

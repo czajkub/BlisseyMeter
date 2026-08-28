@@ -56,11 +56,15 @@ impl PlayerState {
     }
 
     pub fn get_active_pokemon_state(&self) -> Option<&PokemonState> {
-        self.team.get(&self.active_pokemon_display_name())
+        self.active_pokemon
+            .as_ref()
+            .and_then(|nickname| self.team.get(nickname))
     }
 
     pub fn get_active_pokemon_state_mut(&mut self) -> Option<&mut PokemonState> {
-        self.team.get_mut(&self.active_pokemon_display_name())
+        self.active_pokemon
+            .as_ref()
+            .and_then(|nickname| self.team.get_mut(nickname))
     }
 
     /// Takes (and clears) the pending flinch chance from the active Pokémon,
@@ -74,8 +78,12 @@ impl PlayerState {
 
     /// Sets a pending flinch chance on the active Pokémon.
     pub fn set_active_pending_flinch(&mut self, flinch_chance: u64, source_move: String) {
-        let Some(active_nick) = self.active_pokemon.clone() else { return };
-        let Some(pokemon) = self.team.get_mut(&active_nick) else { return };
+        let Some(active_nick) = self.active_pokemon.clone() else {
+            return;
+        };
+        let Some(pokemon) = self.team.get_mut(&active_nick) else {
+            return;
+        };
         pokemon.pending_flinch_chance = Some((flinch_chance, source_move));
     }
 }

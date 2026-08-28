@@ -1,15 +1,7 @@
-use crate::schema::lines::{MainLine, MainLineKind};
+use crate::schema::lines::{Hp, PokemonRef};
 use crate::schema::state::{GameState, PokemonState};
 
-pub fn handle_switch(state: &mut GameState, line: &MainLine) {
-    let MainLineKind::Switch {
-        source_pokemon,
-        species,
-        hp,
-    } = &line.kind
-    else {
-        return;
-    };
+pub fn handle_switch(state: &mut GameState, source_pokemon: &PokemonRef, species: &str, hp: &Hp) {
     let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {
         return;
     };
@@ -26,12 +18,12 @@ pub fn handle_switch(state: &mut GameState, line: &MainLine) {
         pokemon.current_hp = hp.current;
         pokemon.max_hp = hp.max;
         if pokemon.species.is_empty() && !species.is_empty() {
-            pokemon.species = species.clone();
+            pokemon.species = species.to_string();
         }
     } else {
         player_state.team.insert(
             nickname.clone(),
-            PokemonState::new(nickname.clone(), species.clone(), hp.current, hp.max),
+            PokemonState::new(nickname.clone(), species.to_string(), hp.current, hp.max),
         );
     }
 }

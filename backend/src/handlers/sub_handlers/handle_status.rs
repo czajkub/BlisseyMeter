@@ -1,17 +1,13 @@
-use crate::schema::lines::SubLine;
+use crate::schema::lines::PokemonRef;
 use crate::schema::state::GameState;
+use crate::schema::state::Status;
 
-pub fn handle_status(state: &mut GameState, line: &SubLine) {
-    let SubLine::Status { target, status, .. } = line else {
-        return;
-    };
-    let Some(player_state) = state.get_player_state_mut(target.player.as_str()) else {
-        return;
-    };
-    let Some(pokemon) = player_state.team.get_mut(&target.pokemon_nickname) else {
+pub fn handle_status(state: &mut GameState, target: &PokemonRef, status: Option<&Status>) {
+    let Some(pokemon) = state.get_pokemon_mut(target) else {
         return;
     };
 
-    pokemon.status = status.clone();
+    let Some(status) = status else { return };
+    pokemon.status = Some(status.clone());
     pokemon.status_turns = 0;
 }

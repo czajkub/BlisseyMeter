@@ -1,5 +1,5 @@
 use crate::constants::luck_weights::{SECONDARY_EFFECT_WEIGHT, STATUS_WEIGHT};
-use crate::schema::lines::{MainLine, MainLineKind};
+use crate::schema::lines::PokemonRef;
 use crate::schema::state::{GameState, LuckCategory, LuckEvent};
 
 fn handle_flinch(
@@ -27,7 +27,7 @@ fn handle_flinch(
         .unwrap_or_default();
 
     if let Some(affected_state) = state.get_player_state_mut(target_player) {
-        affected_state.luck_events.push(LuckEvent {
+        affected_state.add_luck_event(LuckEvent {
             turn: current_turn,
             pokemon: target_display.clone(),
             category: LuckCategory::Flinch,
@@ -43,7 +43,7 @@ fn handle_flinch(
     }
 
     if let Some(opponent_state) = state.get_opponent_state_mut(target_player) {
-        opponent_state.luck_events.push(LuckEvent {
+        opponent_state.add_luck_event(LuckEvent {
             turn: current_turn,
             pokemon: attacker_display,
             category: LuckCategory::SecondaryEffect,
@@ -62,7 +62,7 @@ fn handle_paralysis(state: &mut GameState, player: &str, nickname: &str, current
         .unwrap_or_else(|| nickname.to_string());
 
     if let Some(player_state) = state.get_player_state_mut(player) {
-        player_state.luck_events.push(LuckEvent {
+        player_state.add_luck_event(LuckEvent {
             turn: current_turn,
             pokemon: pokemon_display,
             category: LuckCategory::StatusTurn,
@@ -82,20 +82,17 @@ fn handle_sleep(state: &mut GameState, player: &str) {
     }
 }
 
-pub fn handle_cant(state: &mut GameState, line: &MainLine) {
-    let MainLineKind::Cant {
-        source_pokemon,
-        reason,
-        source,
-    } = &line.kind
-    else {
-        return;
-    };
+pub fn handle_cant(
+    state: &mut GameState,
+    source_pokemon: &PokemonRef,
+    reason: &str,
+    source: Option<&PokemonRef>,
+) {
     let player = source_pokemon.player.as_str();
     let nickname = &source_pokemon.pokemon_nickname;
 
-    match reason.as_str() {
-        "flinch" => handle_flinch(state, player, nickname, source.as_ref(), state.turn),
+    match reason {
+        "flinch" => handle_flinch(state, player, nickname, source, state.turn),
         "par" => handle_paralysis(state, player, nickname, state.turn),
         "slp" => handle_sleep(state, player),
         _ => {}

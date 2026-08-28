@@ -19,11 +19,30 @@ pub use handle_move::handle_move;
 
 pub fn handle_main_line(state: &mut GameState, line: &MainLine) {
     match &line.kind {
-        MainLineKind::Switch { .. } => handle_switch(state, line),
-        MainLineKind::Move { .. } => handle_move(state, line),
-        MainLineKind::Faint { .. } => handle_faint(state, line),
-        MainLineKind::DetailsChange { .. } => handle_detailschange(state, line),
-        MainLineKind::Cant { .. } => handle_cant(state, line),
-        MainLineKind::CureStatus { .. } => handle_curestatus(state, line),
+        MainLineKind::Switch {
+            source_pokemon,
+            species,
+            hp,
+        } => handle_switch(state, source_pokemon, species, hp),
+        MainLineKind::Move {
+            source_pokemon,
+            move_name,
+            ..
+        } => handle_move(state, source_pokemon, move_name, &line.sublines),
+        MainLineKind::Faint { source_pokemon } => handle_faint(state, source_pokemon),
+        MainLineKind::DetailsChange {
+            source_pokemon,
+            new_form,
+        } => handle_detailschange(state, source_pokemon, new_form),
+        MainLineKind::Cant {
+            source_pokemon,
+            reason,
+            source,
+        } => handle_cant(state, source_pokemon, reason, source.as_ref()),
+        MainLineKind::CureStatus {
+            source_pokemon,
+            cured_status,
+            ..
+        } => handle_curestatus(state, source_pokemon, cured_status.as_ref()),
     }
 }

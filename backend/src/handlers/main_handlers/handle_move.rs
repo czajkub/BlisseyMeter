@@ -2,7 +2,7 @@ use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
 use crate::handlers::sub_handlers::{handle_boost, handle_status};
-use crate::schema::lines::{MainLine, MainLineKind, SubLine};
+use crate::schema::lines::{PokemonRef, SubLine};
 use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
 fn check_preconditions(
@@ -21,7 +21,7 @@ fn check_preconditions(
         && let Some(opponent_state) = state.get_opponent_state_mut(source_player)
     {
         let attacker_display = opponent_state.active_pokemon_display_name();
-        opponent_state.luck_events.push(LuckEvent {
+        opponent_state.add_luck_event(LuckEvent {
             turn: current_turn,
             pokemon: attacker_display,
             category: LuckCategory::SecondaryEffect,
@@ -42,7 +42,7 @@ fn check_preconditions(
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
 
     if pokemon_status == Some(Status::Paralysis) {
-        player_state.luck_events.push(LuckEvent {
+        player_state.add_luck_event(LuckEvent {
             turn: current_turn,
             pokemon: pokemon_display,
             category: LuckCategory::StatusTurn,
@@ -54,39 +54,50 @@ fn check_preconditions(
     }
 }
 
-pub fn handle_move(state: &mut GameState, line: &MainLine) {
-    let MainLineKind::Move {
-        source_pokemon,
-        move_name,
-        ..
-    } = &line.kind
-    else {
-        return;
-    };
-    let source_player = source_pokemon.player.as_str();
-    let source_nickname = &source_pokemon.pokemon_nickname;
-    let current_turn = state.turn;
-
-    check_preconditions(state, source_player, source_nickname, current_turn);
-
+fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bool) {
     let mut has_miss_subline = false;
     let mut has_secondary_subline = false;
 
-    for subline in &line.sublines {
+    for subline in sublines {
         match subline {
             SubLine::Miss { .. } => has_miss_subline = true,
-            SubLine::Boost { .. } | SubLine::Unboost { .. } => {
+            SubLine::Boost {
+                target,
+                stat,
+                amount,
+            } => {
                 has_secondary_subline = true;
-                handle_boost(state, subline);
+                handle_boost(state, target, stat, *amount);
             }
-            SubLine::Status { .. } => {
+            SubLine::Unboost {
+                target,
+                stat,
+                amount,
+            } => {
                 has_secondary_subline = true;
-                handle_status(state, subline);
+                handle_boost(state, target, stat, -*amount);
+            }
+            SubLine::Status { target, status, .. } => {
+                has_secondary_subline = true;
+                handle_status(state, target, status.as_ref());
             }
             _ => {}
         }
     }
 
+    (has_miss_subline, has_secondary_subline)
+}
+
+fn record_move_luck_events(
+    state: &mut GameState,
+    source_pokemon: &PokemonRef,
+    move_name: &str,
+    sublines: &[SubLine],
+    current_turn: u32,
+    (has_miss_subline, has_secondary_subline): (bool, bool),
+) {
+    let source_player = source_pokemon.player.as_str();
+    let source_nickname = &source_pokemon.pokemon_nickname;
     let Some(player_state) = state.get_player_state_mut(source_player) else {
         return;
     };
@@ -109,12 +120,12 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
             category: LuckCategory::SecondaryEffect,
             score: SECONDARY_EFFECT_WEIGHT * (secondary_effect_chance as f64 / 100.0),
             description: format!("Didn't activate secondary effect of {move_name}"),
-            source_move: Some(move_name.clone()),
+            source_move: Some(move_name.to_string()),
             is_beneficial: false,
         });
     }
 
-    for subline in &line.sublines {
+    for subline in sublines {
         match subline {
             SubLine::Crit { .. } => luck_events.push(LuckEvent {
                 turn: current_turn,
@@ -122,7 +133,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                 category: LuckCategory::CriticalHit,
                 score: CRIT_WEIGHT,
                 description: "Critical hit!".to_string(),
-                source_move: Some(move_name.clone()),
+                source_move: Some(move_name.to_string()),
                 is_beneficial: true,
             }),
             SubLine::Miss { .. } => luck_events.push(LuckEvent {
@@ -131,7 +142,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                 category: LuckCategory::AccuracyMiss,
                 score: MISS_WEIGHT * (move_accuracy as f64 / 100.0),
                 description: format!("Missed move with accuracy {move_accuracy}"),
-                source_move: Some(move_name.clone()),
+                source_move: Some(move_name.to_string()),
                 is_beneficial: false,
             }),
             SubLine::Boost { .. } | SubLine::Unboost { .. } | SubLine::Status { .. }
@@ -146,7 +157,7 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
                     description: format!(
                         "Secondary effect activated - {secondary_effect_chance}% chance"
                     ),
-                    source_move: Some(move_name.clone()),
+                    source_move: Some(move_name.to_string()),
                     is_beneficial: true,
                 });
             }
@@ -154,13 +165,42 @@ pub fn handle_move(state: &mut GameState, line: &MainLine) {
         }
     }
 
-    player_state.luck_events.extend(luck_events);
+    for event in luck_events {
+        player_state.add_luck_event(event);
+    }
+}
 
-    if !has_miss_subline
-        && let Some(&(move_name, flinch_chance)) =
-            FLINCH_MOVES.iter().find(|(name, _)| *name == move_name)
+fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &str, missed: bool) {
+    if missed {
+        return;
+    }
+    if let Some(&(flinch_move, flinch_chance)) =
+        FLINCH_MOVES.iter().find(|(name, _)| *name == move_name)
         && let Some(opponent_state) = state.get_opponent_state_mut(source_player)
     {
-        opponent_state.set_active_pending_flinch(flinch_chance, move_name.to_string());
+        opponent_state.set_active_pending_flinch(flinch_chance, flinch_move.to_string());
     }
+}
+
+pub fn handle_move(
+    state: &mut GameState,
+    source_pokemon: &PokemonRef,
+    move_name: &str,
+    sublines: &[SubLine],
+) {
+    let source_player = source_pokemon.player.as_str();
+    let source_nickname = &source_pokemon.pokemon_nickname;
+    let current_turn = state.turn;
+
+    check_preconditions(state, source_player, source_nickname, current_turn);
+    let (has_miss_subline, has_secondary_subline) = apply_move_sublines(state, sublines);
+    record_move_luck_events(
+        state,
+        source_pokemon,
+        move_name,
+        sublines,
+        current_turn,
+        (has_miss_subline, has_secondary_subline),
+    );
+    set_pending_flinch(state, source_player, move_name, has_miss_subline);
 }

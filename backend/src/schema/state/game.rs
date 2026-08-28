@@ -1,4 +1,6 @@
-use super::{FieldState, PlayerState};
+use crate::schema::lines::PokemonRef;
+
+use super::{FieldState, PlayerState, PokemonState};
 
 #[derive(Debug, Clone, Default)]
 pub struct GameState {
@@ -51,5 +53,11 @@ impl GameState {
         } else {
             None
         }
+    }
+
+    pub fn get_pokemon_mut(&mut self, pokemon: &PokemonRef) -> Option<&mut PokemonState> {
+        self.get_player_state_mut(pokemon.player.as_str())?
+            .team
+            .get_mut(&pokemon.pokemon_nickname)
     }
 }
