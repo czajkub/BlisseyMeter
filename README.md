@@ -31,6 +31,11 @@ out by RNG.
 - tbh the frontend is vibe coded, full disclosure - the backend is not though :P
 
 Frontend workspaces are managed with `pnpm`
+
+For Cloudflare Pages, use the SvelteKit framework preset with `pnpm run build` as the build
+command and `.svelte-kit/cloudflare` as the output directory. Cloudflare sets `CF_PAGES`
+automatically, which selects the Cloudflare adapter in `frontend/svelte.config.js`.
+
 ---
 
 ## How Showdown replay logs work
@@ -153,6 +158,19 @@ The frontend ties this together visually:
 ---
 
 ## Running locally
+
+### Docker Compose
+
+Run both services locally with Docker:
+
+```bash
+docker compose up --build
+```
+
+The frontend is available at `http://localhost:3000` and the backend at
+`http://localhost:8080`. Override the browser-visible API URL with `PUBLIC_API_URL` when
+the services are deployed on different hosts.
+
 
 ### Backend
 

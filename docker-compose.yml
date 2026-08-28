@@ -1,0 +1,21 @@
+services:
+  backend:
+    init: true # for quick shutdown
+    build:
+      context: ./backend
+    environment:
+      PORT: 8080
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        PUBLIC_API_URL: ${PUBLIC_API_URL:-http://localhost:8080}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"

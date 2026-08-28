@@ -1,0 +1,9 @@
+.git
+.github
+backend/target
+frontend/node_modules
+frontend/.svelte-kit
+frontend/build
+node_modules
+*.env
+!.env.example
