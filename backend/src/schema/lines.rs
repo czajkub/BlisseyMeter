@@ -1,4 +1,4 @@
-use crate::schema::state::Status;
+use crate::schema::state::{Status, Weather};
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -42,6 +42,9 @@ pub enum MainLineKind {
         source_pokemon: PokemonRef,
         cured_status: Option<Status>,
         meta: String,
+    },
+    WeatherChange {
+        new_weather: Weather,
     },
 }
 

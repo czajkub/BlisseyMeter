@@ -55,6 +55,12 @@ impl GameState {
         }
     }
 
+    pub fn get_pokemon(&self, pokemon: &PokemonRef) -> Option<&PokemonState> {
+        self.get_player_state(pokemon.player.as_str())?
+            .team
+            .get(&pokemon.pokemon_nickname)
+    }
+    
     pub fn get_pokemon_mut(&mut self, pokemon: &PokemonRef) -> Option<&mut PokemonState> {
         self.get_player_state_mut(pokemon.player.as_str())?
             .team

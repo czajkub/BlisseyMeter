@@ -27,8 +27,8 @@ pub fn handle_main_line(state: &mut GameState, line: &MainLine) {
         MainLineKind::Move {
             source_pokemon,
             move_name,
-            ..
-        } => handle_move(state, source_pokemon, move_name, &line.sublines),
+            target,
+        } => handle_move(state, source_pokemon, move_name, target, &line.sublines),
         MainLineKind::Faint { source_pokemon } => handle_faint(state, source_pokemon),
         MainLineKind::DetailsChange {
             source_pokemon,

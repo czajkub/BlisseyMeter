@@ -35,6 +35,14 @@ impl PlayerState {
         self.luck_events.push(event);
     }
 
+    pub fn add_luck_events(&mut self, events: Vec<LuckEvent>) {
+        for event in &events {
+            self.total_luck_score += event.score;
+        }
+        self.luck_events.extend(events);
+    }
+    
+
     pub fn recalculate_total(&mut self) {
         self.total_luck_score = self.luck_events.iter().map(|event| event.score).sum();
     }

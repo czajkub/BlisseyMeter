@@ -6,8 +6,10 @@ pub struct FieldState {
     pub p2_side: SideConditions,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum Weather {
+    #[default]
+    None,
     Sun,
     HarshSun,
     Rain,
@@ -15,6 +17,24 @@ pub enum Weather {
     Sand,
     Snow,
     Hail,
+    DeltaStream,
+}
+
+impl Weather {
+    pub fn from_log(value: &str) -> Self {
+        match value {
+            "none" => Weather::None,
+            "RainDance" => Weather::Rain,
+            "PrimordialSea" => Weather::HeavyRain,
+            "SunnyDay" => Weather::Sun,
+            "DesolateLand" => Weather::HarshSun,
+            "Sandstorm" => Weather::Sand,
+            "DeltaStream" => Weather::DeltaStream,
+            "Snowscape" => Weather::Snow,
+            "Hail" => Weather::Hail,
+            &_ => Weather::None
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]

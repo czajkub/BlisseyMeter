@@ -1,7 +1,7 @@
 use crate::schema::lines::{
     Hp, InfoLine, Line, MainLine, MainLineKind, PlayerId, PokemonRef, SubLine,
 };
-use crate::schema::state::GameState;
+use crate::schema::state::{GameState, Weather};
 
 fn field<'a>(fields: &mut impl Iterator<Item = &'a str>) -> &'a str {
     fields.next().unwrap_or_default().trim()
@@ -122,6 +122,12 @@ fn parse_line(line: &str) -> Line {
                 })
             })
             .unwrap_or(Line::Unknown),
+        "-weather" => Line::Main(MainLine {
+            kind: MainLineKind::WeatherChange { 
+                new_weather: Weather::from_log(field(&mut fields))
+            },
+            sublines: Vec::new(),
+        }), 
         "turn" => Line::Info(InfoLine::Turn {
             turn: field(&mut fields).parse().unwrap_or(0),
         }),

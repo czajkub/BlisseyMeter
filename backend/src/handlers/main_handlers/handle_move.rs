@@ -3,7 +3,7 @@ use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
 use crate::handlers::sub_handlers::{handle_boost, handle_status};
 use crate::schema::lines::{PokemonRef, SubLine};
-use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
+use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status, Weather};
 
 fn check_preconditions(
     state: &mut GameState,
@@ -92,20 +92,34 @@ fn record_move_luck_events(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     move_name: &str,
+    target_pokemon: &PokemonRef,
     sublines: &[SubLine],
     current_turn: u32,
     (has_miss_subline, has_secondary_subline): (bool, bool),
 ) {
     let source_player = source_pokemon.player.as_str();
     let source_nickname = &source_pokemon.pokemon_nickname;
-    let Some(player_state) = state.get_player_state_mut(source_player) else {
-        return;
-    };
+    
     let move_data = moves().get(move_name);
-    let move_accuracy = move_data.map_or(100, |data| data.get_accuracy());
+    
+    let move_accuracy = move_data.map_or(
+        100,
+        |data| data.get_accuracy_with_modifiers(
+            &state,
+            source_pokemon,
+            target_pokemon,
+        )
+    );
+
     let secondary_effect_chance = move_data
         .and_then(|data| data.secondary_effect)
         .unwrap_or(0);
+
+    
+    let Some(player_state) = state.get_player_state_mut(source_player) else {
+        return;
+    };
+    
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
     let mut luck_events = Vec::new();
 
@@ -165,9 +179,7 @@ fn record_move_luck_events(
         }
     }
 
-    for event in luck_events {
-        player_state.add_luck_event(event);
-    }
+    player_state.add_luck_events(luck_events);
 }
 
 fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &str, missed: bool) {
@@ -186,6 +198,7 @@ pub fn handle_move(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     move_name: &str,
+    target_pokemon: &PokemonRef,
     sublines: &[SubLine],
 ) {
     let source_player = source_pokemon.player.as_str();
@@ -198,6 +211,7 @@ pub fn handle_move(
         state,
         source_pokemon,
         move_name,
+        target_pokemon,
         sublines,
         current_turn,
         (has_miss_subline, has_secondary_subline),
