@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::sync::LazyLock;
-use std::cmp::{min, max};
+use std::cmp::max;
 
 use crate::schema::lines::PokemonRef;
 use crate::schema::state::{GameState, Weather};

@@ -6,7 +6,13 @@ pub struct FieldState {
     pub p2_side: SideConditions,
 }
 
-#[derive(Debug, Clone, PartialEq, Default)]
+impl FieldState {
+    pub fn set_new_weather(&mut self, new_weather: &Weather) {
+        self.weather = Some(*new_weather);
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Default)]
 pub enum Weather {
     #[default]
     None,

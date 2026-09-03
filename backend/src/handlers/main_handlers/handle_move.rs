@@ -3,7 +3,7 @@ use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
 use crate::handlers::sub_handlers::{handle_boost, handle_status};
 use crate::schema::lines::{PokemonRef, SubLine};
-use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status, Weather};
+use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
 fn check_preconditions(
     state: &mut GameState,
@@ -103,7 +103,7 @@ fn record_move_luck_events(
     let move_data = moves().get(move_name);
     
     let move_accuracy = move_data.map_or(
-        100,
+        100.0,
         |data| data.get_accuracy_with_modifiers(
             &state,
             source_pokemon,
