@@ -3,3 +3,4 @@ pub mod constants;
 pub mod fetch;
 pub mod handlers;
 pub mod schema;
+pub mod pokepaste_parser;

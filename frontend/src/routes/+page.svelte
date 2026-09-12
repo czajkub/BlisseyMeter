@@ -41,6 +41,8 @@
 	}
 
 	let replayUrl = $state('');
+	let p1PokepasteUrl = $state('');
+	let p2PokepasteUrl = $state('');
 	let loading = $state(false);
 	let error = $state<string | null>(null);
 	let result = $state<AnalysisResult | null>(null);
@@ -184,6 +186,12 @@
 		return `${trimmed.slice(0, qIdx)}.log${trimmed.slice(qIdx)}`;
 	}
 
+	function toPokepasteRawUrl(url: string): string {
+		let trimmed = url.trim().replace(/\/+$/, '');
+		if (!/^https?:\/\//i.test(trimmed)) trimmed = `https://${trimmed}`;
+		return /\/raw$/i.test(trimmed) ? trimmed : `${trimmed}/raw`;
+	}
+
 	function replayFetchError(status: number): string {
 		if (status === 404) return 'Replay not found — double-check the URL.';
 		return `Failed to fetch the replay from Showdown (HTTP ${status}).`;
@@ -222,22 +230,45 @@
 				throw e;
 			}
 
-			// 2. Send the raw log text to the analysis API.
+			// 2. Fetch optional team exports in the browser. Pokepaste's /raw
+			// endpoint is CORS-enabled and avoids scraping the rendered page.
+			async function fetchPokepaste(url: string, player: string): Promise<string | null> {
+				if (!url.trim()) return null;
+				const response = await fetch(toPokepasteRawUrl(url));
+				if (!response.ok) {
+					if (response.status === 404) throw new Error(`${player} Pokepaste was not found.`);
+					throw new Error(`Failed to fetch the ${player} Pokepaste (HTTP ${response.status}).`);
+				}
+				return response.text();
+			}
+
+			const [p1Pokepaste, p2Pokepaste] = await Promise.all([
+				fetchPokepaste(p1PokepasteUrl, 'Player 1'),
+				fetchPokepaste(p2PokepasteUrl, 'Player 2'),
+			]);
+
+			// 3. Send the replay and optional raw team exports to the analysis API.
 			const apiUrl = PUBLIC_API_URL || 'http://localhost:8080';
 			let response: Response;
 			try {
-				response = await fetch(`${apiUrl}/analyze-raw`, {
+				response = await fetch(`${apiUrl}/analyze-with-pokepaste`, {
 					method: 'POST',
 					headers: {
-						'Content-Type': 'text/plain'
+						'Content-Type': 'application/json'
 					},
-					body: logText
+					body: JSON.stringify({
+						replay: logText,
+						p1_pokepaste: p1Pokepaste,
+						p2_pokepaste: p2Pokepaste,
+					})
 				});
 			} catch {
 				throw new Error("Couldn't reach the analysis server — try again later.");
 			}
 
 			if (!response.ok) {
+				if (response.status === 404)
+					throw new Error('The Pokepaste analysis endpoint is not available yet.');
 				throw new Error(apiError(response.status));
 			}
 
@@ -257,17 +288,38 @@
 <main class="container">
 	<h1>BlisseyMeter</h1>
 	
-	<div class="form-container">
-		<input 
-			type="url" 
-			bind:value={replayUrl} 
-			placeholder="Enter Pokémon Showdown replay URL..." 
-			disabled={loading}
-		/>
-		<button onclick={analyzeReplay} disabled={loading || !replayUrl}>
-			{loading ? 'Analyzing...' : 'Analyze'}
-		</button>
-	</div>
+		<div class="form-container">
+			<label>
+				<span>Replay</span>
+				<input
+					type="url"
+					bind:value={replayUrl}
+					placeholder="Pokémon Showdown replay URL..."
+					disabled={loading}
+				/>
+			</label>
+			<label>
+				<span>Player 1 Pokepaste <small>(optional)</small></span>
+				<input
+					type="url"
+					bind:value={p1PokepasteUrl}
+					placeholder="pokepast.es/..."
+					disabled={loading}
+				/>
+			</label>
+			<label>
+				<span>Player 2 Pokepaste <small>(optional)</small></span>
+				<input
+					type="url"
+					bind:value={p2PokepasteUrl}
+					placeholder="pokepast.es/..."
+					disabled={loading}
+				/>
+			</label>
+			<button onclick={analyzeReplay} disabled={loading || !replayUrl}>
+				{loading ? 'Analyzing...' : 'Analyze'}
+			</button>
+		</div>
 
 	{#if error}
 		<div class="error">
@@ -491,10 +543,30 @@
 	}
 
 	.form-container {
-		display: flex;
-		gap: 1rem;
+		display: grid;
+		grid-template-columns: 1.4fr 1fr 1fr auto;
+		align-items: end;
+		gap: 0.75rem;
 		width: 100%;
 		margin: 0 auto 3rem auto;
+	}
+
+	.form-container label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		min-width: 0;
+	}
+
+	.form-container label span {
+		font-size: 0.75rem;
+		font-weight: 700;
+		color: #4a5568;
+	}
+
+	.form-container small {
+		font-weight: 400;
+		color: #718096;
 	}
 
 	input {
@@ -946,6 +1018,14 @@
 	}
 
 	@media (max-width: 768px) {
+		.form-container {
+			grid-template-columns: 1fr;
+		}
+
+		.form-container button {
+			width: 100%;
+		}
+
 		.results {
 			grid-template-columns: 1fr;
 		}

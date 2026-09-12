@@ -292,23 +292,26 @@ fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
     parsed_lines
 }
 
-pub async fn analyze(lines: Vec<String>) -> GameState {
+pub async fn analyze(
+    lines: Vec<String>,
+    p1_pokepaste: Option<String>,
+    p2_pokepaste: Option<String>,
+) -> GameState {
     let mut game_state = GameState::default();
     let game_lines = parse_game_lines(lines);
+
+    let (p1_team, p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
 
     for line in game_lines {
         match line {
             Line::Main(main_line) => {
                 crate::handlers::main_handlers::handle_main_line(&mut game_state, &main_line);
             }
-            Line::Sub(_sub_line) => {
-                // Handle sub line
-                // TODO: process sub line
-            }
             Line::Info(InfoLine::Turn { turn }) => game_state.turn = turn,
             Line::Info(info_line) => {
                 crate::handlers::info_handlers::handle_info_line(&mut game_state, &info_line)
             }
+            Line::Sub(_) => {} 
             Line::Unknown => {
                 // Skip unknown lines or log them
             }

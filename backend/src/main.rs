@@ -1,6 +1,6 @@
 use std::env;
 use dotenv::dotenv;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use backend::schema::state::LuckEvent;
 
 use axum::{
@@ -30,12 +30,27 @@ struct AnalyzeResponse {
     p2: PlayerData,
 }
 
+#[derive(Deserialize)]
+struct AnalyzeWithPokepasteRequest {
+    replay: String,
+    p1_pokepaste: Option<String>,
+    p2_pokepaste: Option<String>,
+}
+
 async fn index() -> &'static str {
     "Hello, world!\n"
 }
 
-async fn analyze_lines(lines: Vec<String>) -> AnalyzeResponse {
-    let game_state = analyze(lines).await;
+async fn analyze_lines(
+    lines: Vec<String>,
+    p1_pokepaste: Option<String>,
+    p2_pokepaste: Option<String>,
+) -> AnalyzeResponse {
+    let game_state = analyze(
+        lines,
+        p1_pokepaste,
+        p2_pokepaste
+    ).await;
     AnalyzeResponse {
         p1: PlayerData {
             name: game_state.p1.name.clone(),
@@ -62,6 +77,13 @@ async fn analyze_raw(body: String) -> impl IntoResponse {
     (StatusCode::OK, Json(analyze_lines(lines).await))
 }
 
+async fn analyze_with_pokepaste(
+    Json(request): Json<AnalyzeWithPokepasteRequest>,
+) -> impl IntoResponse {
+    let lines: Vec<String> = request.replay.split('\n').map(str::to_string).collect();
+    (StatusCode::OK, Json(analyze_lines(lines).await))
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     dotenv().ok();
@@ -78,6 +100,7 @@ async fn main() -> Result<(), Error> {
         .route("/", get(index))
         .route("/analyze", post(analyze_replay))
         .route("/analyze-raw", post(analyze_raw))
+        .route("/analyze-with-pokepaste", post(analyze_with_pokepaste))
         .layer(cors);
 
     let is_lambda = env::var("AWS_LAMBDA_RUNTIME_API").is_ok() || env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok();
