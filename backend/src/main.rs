@@ -67,21 +67,24 @@ async fn analyze_lines(
 
 async fn analyze_replay(body: String) -> impl IntoResponse {
     match fetch_replay(&body).await {
-        Ok(lines) => (StatusCode::OK, Json(analyze_lines(lines).await)).into_response(),
+        Ok(lines) => (StatusCode::OK, Json(analyze_lines(lines, None, None).await)).into_response(),
         Err(e) => (StatusCode::BAD_REQUEST, e).into_response(),
     }
 }
 
 async fn analyze_raw(body: String) -> impl IntoResponse {
     let lines: Vec<String> = body.split('\n').map(|s| s.to_string()).collect();
-    (StatusCode::OK, Json(analyze_lines(lines).await))
+    (StatusCode::OK, Json(analyze_lines(lines, None, None).await))
 }
 
 async fn analyze_with_pokepaste(
     Json(request): Json<AnalyzeWithPokepasteRequest>,
 ) -> impl IntoResponse {
     let lines: Vec<String> = request.replay.split('\n').map(str::to_string).collect();
-    (StatusCode::OK, Json(analyze_lines(lines).await))
+    (
+        StatusCode::OK,
+        Json(analyze_lines(lines, request.p1_pokepaste, request.p2_pokepaste).await),
+    )
 }
 
 #[tokio::main]

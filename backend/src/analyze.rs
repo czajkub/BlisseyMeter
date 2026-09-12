@@ -2,6 +2,7 @@ use crate::schema::lines::{
     Hp, InfoLine, Line, MainLine, MainLineKind, PlayerId, PokemonRef, SubLine,
 };
 use crate::schema::state::{GameState, Weather};
+use crate::pokepaste_parser::parse_pokepastes;
 
 fn field<'a>(fields: &mut impl Iterator<Item = &'a str>) -> &'a str {
     fields.next().unwrap_or_default().trim()
@@ -300,7 +301,7 @@ pub async fn analyze(
     let mut game_state = GameState::default();
     let game_lines = parse_game_lines(lines);
 
-    let (p1_team, p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
+    let (_p1_team, _p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
 
     for line in game_lines {
         match line {
