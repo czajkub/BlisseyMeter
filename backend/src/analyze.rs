@@ -324,7 +324,19 @@ pub async fn analyze(
         }
     }
 
-    let (_p1_team, _p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
+    let (p1_team, p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
+
+    for pokemon in p1_team {
+        game_state
+            .p1
+            .update_pokemon_paste(&pokemon.species, &pokemon.set);
+    }
+
+    for pokemon in p2_team {
+        game_state
+            .p2
+            .update_pokemon_paste(&pokemon.species, &pokemon.set);
+    }
 
     for line in game_lines {
         match line {

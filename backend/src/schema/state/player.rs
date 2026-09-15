@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{LuckEvent, PokemonState};
+use super::{LuckEvent, PokemonSet, PokemonState};
 
 #[derive(Debug, Clone)]
 pub struct PlayerState {
@@ -45,6 +45,20 @@ impl PlayerState {
 
     pub fn recalculate_total(&mut self) {
         self.total_luck_score = self.luck_events.iter().map(|event| event.score).sum();
+    }
+
+    pub fn update_pokemon_paste(&mut self, species: &str, paste: &PokemonSet) {
+        let Some(pokemon) = self.team.get_mut(species) else {
+            return;
+        };
+
+        pokemon.set.evs = paste.evs.clone();
+        pokemon.set.ivs = paste.ivs.clone();
+        pokemon.set.moves.extend(paste.moves.iter().cloned());
+        pokemon.set.item = paste.item.clone();
+        pokemon.set.ability = paste.ability.clone();
+        pokemon.set.nature = paste.nature.clone();
+        pokemon.set.has_pokepaste = true;
     }
 
     pub fn pokemon_display_name(&self, nickname: &str) -> String {

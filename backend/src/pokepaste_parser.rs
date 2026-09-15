@@ -1,27 +1,15 @@
+use std::collections::HashSet;
+
 use regex::Regex;
 
-use crate::constants::moves::{self, Move};
+use crate::constants::moves;
+use crate::schema::state::{EvSpread, IvSpread, PokemonSet};
 
 #[derive(Debug, Clone)]
 pub struct ParsedPokemon {
     pub nickname: Option<String>,
     pub species: String,
-    pub item: Option<String>,
-    pub ability: String,
-    pub evs: EVs,
-    pub nature: String,
-    pub ivs: Option<String>,
-    pub moves: Vec<Move>,
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct EVs {
-    pub hp: u8,
-    pub atk: u8,
-    pub def: u8,
-    pub spa: u8,
-    pub spd: u8,
-    pub spe: u8,
+    pub set: PokemonSet,
 }
 
 pub fn parse_pokepastes(
@@ -70,7 +58,7 @@ fn parse_pokemon(block: &str) -> Option<ParsedPokemon> {
     let ivs = if let Some(line) = next_line {
         if line.starts_with("IVs: ") {
             next_line = lines.next();
-            Some(line["IVs: ".len()..].to_owned())
+            parse_ivs(&line["IVs: ".len()..])
         } else {
             None
         }
@@ -78,32 +66,40 @@ fn parse_pokemon(block: &str) -> Option<ParsedPokemon> {
         None
     };
 
-    let moves = next_line
+    let mut move_set = HashSet::new();
+    for name in next_line
         .into_iter()
         .chain(lines)
         .filter_map(|line| line.strip_prefix("- "))
         .map(str::trim)
-        .map(|name| moves::moves().get(name).cloned())
-        .collect::<Option<Vec<_>>>()?;
+    {
+        if !moves::moves().contains_key(name) {
+            return None;
+        }
+        move_set.insert(name.to_owned());
+    }
 
     Some(ParsedPokemon {
         nickname,
         species,
-        item,
-        ability,
-        evs,
-        nature,
-        ivs,
-        moves,
+        set: PokemonSet {
+            evs: Some(evs),
+            ivs,
+            moves: move_set,
+            item,
+            ability: Some(ability),
+            nature: Some(nature),
+            has_pokepaste: true,
+        },
     })
 }
 
-fn parse_evs(value: &str) -> Option<EVs> {
-    let mut evs = EVs::default();
+fn parse_evs(value: &str) -> Option<EvSpread> {
+    let mut evs = EvSpread::default();
 
     for entry in value.split(" / ") {
         let mut parts = entry.split_whitespace();
-        let amount = parts.next()?.parse::<u8>().ok()?;
+        let amount = parts.next()?.parse::<u16>().ok()?;
         let stat = parts.next()?;
 
         match stat {
@@ -118,4 +114,35 @@ fn parse_evs(value: &str) -> Option<EVs> {
     }
 
     Some(evs)
+}
+
+fn parse_ivs(value: &str) -> Option<IvSpread> {
+    let mut ivs = IvSpread {
+        hp: 31,
+        atk: 31,
+        def: 31,
+        spa: 31,
+        spd: 31,
+        spe: 31,
+        acc: 0,
+        eva: 0,
+    };
+
+    for entry in value.split(" / ") {
+        let mut parts = entry.split_whitespace();
+        let amount = parts.next()?.parse::<u8>().ok()?;
+        let stat = parts.next()?;
+
+        match stat {
+            "HP" => ivs.hp = amount,
+            "Atk" => ivs.atk = amount,
+            "Def" => ivs.def = amount,
+            "SpA" => ivs.spa = amount,
+            "SpD" => ivs.spd = amount,
+            "Spe" => ivs.spe = amount,
+            _ => return None,
+        }
+    }
+
+    Some(ivs)
 }
