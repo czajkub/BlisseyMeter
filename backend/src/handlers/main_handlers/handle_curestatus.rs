@@ -20,7 +20,7 @@ pub fn handle_curestatus(
     let Some(slept_turns) = player_state
         .team
         .get(&source_pokemon.pokemon_nickname)
-        .map(|pokemon| pokemon.status_turns)
+        .map(|pokemon| pokemon.condition.status_turns)
     else {
         return;
     };
@@ -48,7 +48,7 @@ pub fn handle_curestatus(
     }
 
     if let Some(pokemon) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
-        pokemon.status = None;
-        pokemon.status_turns = 0;
+        pokemon.condition.status = None;
+        pokemon.condition.status_turns = 0;
     }
 }

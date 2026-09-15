@@ -11,6 +11,6 @@ pub fn handle_faint(state: &mut GameState, source_pokemon: &PokemonRef) {
     }
 
     if let Some(pokemon_state) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
-        pokemon_state.is_fainted = true;
+        pokemon_state.condition.is_fainted = true;
     }
 }

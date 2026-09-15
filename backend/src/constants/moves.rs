@@ -28,8 +28,8 @@ fn resolve_boosts(
     let Some(source_pokemon) = state.get_pokemon(source) else { return *initial_accuracy; };
     let Some(target_pokemon) = state.get_pokemon(target) else { return *initial_accuracy; };
 
-    let source_accuracy = source_pokemon.stat_boosts.acc;
-    let target_evasion = target_pokemon.stat_boosts.eva;
+    let source_accuracy = source_pokemon.battle.stat_boosts.acc;
+    let target_evasion = target_pokemon.battle.stat_boosts.eva;
     
     let stage_multiplier = (source_accuracy - target_evasion).clamp(-6, 6);
 

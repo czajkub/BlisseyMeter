@@ -38,7 +38,7 @@ fn check_preconditions(
     let Some(pokemon) = player_state.team.get(source_nickname) else {
         return;
     };
-    let pokemon_status = pokemon.status.clone();
+    let pokemon_status = pokemon.condition.status.clone();
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
 
     if pokemon_status == Some(Status::Paralysis) {

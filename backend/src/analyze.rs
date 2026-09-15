@@ -261,7 +261,13 @@ fn non_empty(value: &str) -> Option<String> {
     (!value.is_empty()).then(|| value.to_string())
 }
 
-fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
+fn is_start_line(line: &str) -> bool {
+    let mut fields = line.split('|');
+    fields.next();
+    field(&mut fields) == "start"
+}
+
+fn parse_lines(lines: Vec<String>) -> Vec<Line> {
     let mut parsed_lines = Vec::new();
     let mut last_main_line_idx: Option<usize> = None;
 
@@ -293,13 +299,30 @@ fn parse_game_lines(lines: Vec<String>) -> Vec<Line> {
     parsed_lines
 }
 
+fn parse_game_lines(lines: Vec<String>) -> (Vec<Line>, Vec<Line>) {
+    let Some(start_index) = lines.iter().position(|line| is_start_line(line)) else {
+        return (Vec::new(), parse_lines(lines));
+    };
+
+    (
+        parse_lines(lines[..start_index].to_vec()),
+        parse_lines(lines[start_index + 1..].to_vec()),
+    )
+}
+
 pub async fn analyze(
     lines: Vec<String>,
     p1_pokepaste: Option<String>,
     p2_pokepaste: Option<String>,
 ) -> GameState {
     let mut game_state = GameState::default();
-    let game_lines = parse_game_lines(lines);
+    let (info_lines, game_lines) = parse_game_lines(lines);
+
+    for line in info_lines {
+        if let Line::Info(info_line) = line {
+            crate::handlers::info_handlers::handle_info_line(&mut game_state, &info_line);
+        }
+    }
 
     let (_p1_team, _p2_team) = parse_pokepastes(p1_pokepaste, p2_pokepaste);
 

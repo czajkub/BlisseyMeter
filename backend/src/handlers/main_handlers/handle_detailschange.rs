@@ -9,6 +9,6 @@ pub fn handle_detailschange(state: &mut GameState, source_pokemon: &PokemonRef, 
     player_state.active_pokemon = Some(source_pokemon.pokemon_nickname.clone());
 
     if let Some(pokemon_state) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
-        pokemon_state.species = new_form.to_string();
+        pokemon_state.identity.species = new_form.to_string();
     }
 }

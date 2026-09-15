@@ -15,10 +15,10 @@ pub fn handle_switch(state: &mut GameState, source_pokemon: &PokemonRef, species
     }
 
     if let Some(pokemon) = player_state.team.get_mut(nickname) {
-        pokemon.current_hp = hp.current;
-        pokemon.max_hp = hp.max;
-        if pokemon.species.is_empty() && !species.is_empty() {
-            pokemon.species = species.to_string();
+        pokemon.condition.current_hp = hp.current;
+        pokemon.condition.max_hp = hp.max;
+        if pokemon.identity.species.is_empty() && !species.is_empty() {
+            pokemon.identity.species = species.to_string();
         }
     } else {
         player_state.team.insert(

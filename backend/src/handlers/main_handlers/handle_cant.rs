@@ -38,7 +38,7 @@ fn handle_flinch(
         });
 
         if let Some(target_pokemon) = affected_state.team.get_mut(target_nickname) {
-            target_pokemon.pending_flinch_chance = None;
+            target_pokemon.pending.flinch_chance = None;
         }
     }
 

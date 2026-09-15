@@ -8,6 +8,6 @@ pub fn handle_status(state: &mut GameState, target: &PokemonRef, status: Option<
     };
 
     let Some(status) = status else { return };
-    pokemon.status = Some(status.clone());
-    pokemon.status_turns = 0;
+    pokemon.condition.status = Some(status.clone());
+    pokemon.condition.status_turns = 0;
 }

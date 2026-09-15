@@ -49,8 +49,8 @@ impl PlayerState {
 
     pub fn pokemon_display_name(&self, nickname: &str) -> String {
         match self.team.get(nickname) {
-            Some(p) if !p.species.is_empty() && p.species != nickname => {
-                format!("{nickname} ({})", p.species)
+            Some(p) if !p.identity.species.is_empty() && p.identity.species != nickname => {
+                format!("{nickname} ({})", p.identity.species)
             }
             _ => nickname.to_string(),
         }
@@ -80,7 +80,7 @@ impl PlayerState {
     pub fn take_pending_flinch(&mut self) -> Option<(u64, String, String)> {
         let active_nick = self.active_pokemon.as_ref()?.clone();
         let pokemon = self.team.get_mut(&active_nick)?;
-        let (flinch_chance, source_move) = pokemon.pending_flinch_chance.take()?;
+        let (flinch_chance, source_move) = pokemon.pending.flinch_chance.take()?;
         Some((flinch_chance, source_move, active_nick))
     }
 
@@ -92,6 +92,6 @@ impl PlayerState {
         let Some(pokemon) = self.team.get_mut(&active_nick) else {
             return;
         };
-        pokemon.pending_flinch_chance = Some((flinch_chance, source_move));
+        pokemon.pending.flinch_chance = Some((flinch_chance, source_move));
     }
 }

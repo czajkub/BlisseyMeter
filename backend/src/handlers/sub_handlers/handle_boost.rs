@@ -5,5 +5,5 @@ pub fn handle_boost(state: &mut GameState, target: &PokemonRef, stat: &str, amou
     let Some(pokemon) = state.get_pokemon_mut(target) else {
         return;
     };
-    pokemon.stat_boosts.apply_boost(stat, amount);
+    pokemon.battle.stat_boosts.apply_boost(stat, amount);
 }
