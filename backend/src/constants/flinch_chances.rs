@@ -19,7 +19,6 @@ pub const FLINCH_MOVES: &[(&str, u64)] = &[
     ("Ice Fang", 10),
     ("Icicle Crash", 30),
     ("Iron Head", 30),
-    ("Low Kick", 30),
     ("Mountain Gale", 30),
     ("Needle Arm", 30),
     ("Rock Slide", 30),
