@@ -8,7 +8,7 @@ fn process_flinch(
     target_nickname: &str,
     source: Option<&crate::schema::lines::PokemonRef>,
     current_turn: u32,
-) {
+) -> Result<(), String> {
     let target_display = state
         .get_player_state(target_player)
         .map(|player| player.pokemon_display_name(target_nickname))
@@ -53,9 +53,16 @@ fn process_flinch(
             is_beneficial: true,
         });
     }
+
+    Ok(())
 }
 
-fn process_paralysis(state: &mut GameState, player: &str, nickname: &str, current_turn: u32) {
+fn process_paralysis(
+    state: &mut GameState,
+    player: &str,
+    nickname: &str,
+    current_turn: u32
+) -> Result<(), String> {
     let pokemon_display = state
         .get_player_state(player)
         .map(|state| state.pokemon_display_name(nickname))
@@ -72,14 +79,18 @@ fn process_paralysis(state: &mut GameState, player: &str, nickname: &str, curren
             is_beneficial: false,
         });
     }
+
+    Ok(())
 }
 
-fn process_sleep(state: &mut GameState, player: &str) {
+fn process_sleep(state: &mut GameState, player: &str) -> Result<(), String> {
     if let Some(player_state) = state.get_player_state_mut(player)
         && let Some(active_mon_state) = player_state.get_active_pokemon_state_mut()
     {
         active_mon_state.increment_status_turns();
     }
+    
+    Ok(())
 }
 
 pub fn process_cant(
@@ -87,7 +98,7 @@ pub fn process_cant(
     source_pokemon: &PokemonRef,
     reason: &str,
     source: Option<&PokemonRef>,
-) {
+) -> Result<(), String> {
     let player = source_pokemon.player.as_str();
     let nickname = &source_pokemon.pokemon_nickname;
 
@@ -95,6 +106,6 @@ pub fn process_cant(
         "flinch" => process_flinch(state, player, nickname, source, state.turn),
         "par" => process_paralysis(state, player, nickname, state.turn),
         "slp" => process_sleep(state, player),
-        _ => {}
+        _ => Ok(())
     }
 }

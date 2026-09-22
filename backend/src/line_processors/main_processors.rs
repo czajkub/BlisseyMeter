@@ -15,7 +15,7 @@ pub use process_faint::process_faint;
 pub use process_move::process_move;
 pub use process_switch::process_switch;
 
-pub fn process_main_line(state: &mut GameState, line: &MainLine) {
+pub fn process_main_line(state: &mut GameState, line: &MainLine) -> Result<(), String> {
     match &line.kind {
         MainLineKind::Switch {
             source_pokemon,
@@ -42,6 +42,6 @@ pub fn process_main_line(state: &mut GameState, line: &MainLine) {
             cured_status,
             ..
         } => process_curestatus(state, source_pokemon, cured_status.as_ref()),
-        MainLineKind::WeatherChange { new_weather } => { state.field.set_new_weather(new_weather) }
+        MainLineKind::WeatherChange { new_weather } => { state.field.set_new_weather(new_weather); Ok(()) }
     }
 }

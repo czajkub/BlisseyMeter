@@ -2,9 +2,12 @@ use std::collections::HashSet;
 
 use serde::Serialize;
 
+use crate::constants::poke_set_data::Species;
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PokemonState {
     pub identity: Identity,
+    pub specie_data: Species,
     pub condition: Condition,
     pub battle: BattleState,
     pub set: PokemonSet,
@@ -91,19 +94,21 @@ impl Status {
     }
 }
 
+impl Identity {
+    pub fn new(species_name: &String) -> Self {
+        Identity {
+            nickname: species_name.clone(),
+            species: species_name.clone(),
+            gender: None,  // useless for now, might update later for stuff like rivalry
+        }
+    }
+}
+
 impl PokemonState {
-    pub fn new(nickname: String, species: String, current_hp: u8, max_hp: u8) -> Self {
+    pub fn new(species_data: &Species) -> Self {
+        let species_name = &species_data.name;
         PokemonState {
-            identity: Identity {
-                nickname,
-                species,
-                gender: None,
-            },
-            condition: Condition {
-                current_hp,
-                max_hp,
-                ..Default::default()
-            },
+            identity: Identity::new(species_name),
             ..Default::default()
         }
     }

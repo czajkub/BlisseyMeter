@@ -112,7 +112,7 @@ impl Move {
 /// Statics and constants/move_details.csv are baked into the binary via include_str!
 /// for reliability in serverless (Lambda) and cross-platform environments.
 pub static MOVES: LazyLock<HashMap<String, Move>> = LazyLock::new(|| {
-    let csv_data = include_str!("move_details.csv");
+    let csv_data = include_str!("data/move_details.csv");
     let mut rdr = csv::ReaderBuilder::new()
         .delimiter(b';')
         .quoting(true)

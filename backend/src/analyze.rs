@@ -310,6 +310,14 @@ fn parse_game_lines(lines: Vec<String>) -> (Vec<Line>, Vec<Line>) {
     )
 }
 
+// for catching failed parsed turns to return
+// dont feel like doing this now
+#[allow(dead_code)]
+pub struct FailedTurn {
+    turn_number: u8,
+    cause: String,
+}
+
 pub async fn analyze(
     lines: Vec<String>,
     p1_pokepaste: Option<String>,
@@ -341,7 +349,12 @@ pub async fn analyze(
     for line in game_lines {
         match line {
             Line::Main(main_line) => {
-                crate::line_processors::main_processors::process_main_line(&mut game_state, &main_line);
+                if let Err(err) = crate::line_processors::main_processors::process_main_line(&mut game_state, &main_line) {
+                    eprintln!(
+                        "[turn {}] Failed to process main line: {} | {:?}",
+                        game_state.turn, err, main_line
+                    );
+                }
             }
             Line::Info(InfoLine::Turn { turn }) => game_state.turn = turn,
             Line::Info(info_line) => {

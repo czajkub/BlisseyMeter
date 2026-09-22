@@ -1,3 +1,4 @@
+use crate::constants::poke_set_data::get_species;
 use crate::schema::state::{GameState, PokemonState};
 
 pub fn process_poke(state: &mut GameState, player_name: &str, poke_name: &str, gender: &str) {
@@ -5,16 +6,17 @@ pub fn process_poke(state: &mut GameState, player_name: &str, poke_name: &str, g
         return;
     };
 
-    let mut pokemon = PokemonState::new(
-        poke_name.to_string(), // at this point nickname is unknown, use species
-        poke_name.to_string(), // species
-        0,
-        100,
-    );
+    let Some(species_data) = get_species(poke_name) else {
+        return;
+    };
+
+    let mut pokemon = PokemonState::new(species_data);
 
     if !gender.is_empty() {
         pokemon.identity.gender = Some(gender.to_string());
     }
 
-    player_state.team.insert(poke_name.to_string(), pokemon);
+    player_state
+        .team
+        .insert(species_data.name.clone(), pokemon);
 }

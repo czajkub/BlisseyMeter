@@ -10,7 +10,7 @@ fn check_preconditions(
     source_player: &str,
     source_nickname: &str,
     current_turn: u32,
-) {
+) -> Result<(), String> {
     let check_passed_flinch = state
         .get_player_state_mut(source_player)
         .and_then(|player| player.take_pending_flinch());
@@ -33,10 +33,10 @@ fn check_preconditions(
     }
 
     let Some(player_state) = state.get_player_state_mut(source_player) else {
-        return;
+        return Err(format!("Couldn't get state of player {}", source_player));
     };
     let Some(pokemon) = player_state.team.get(source_nickname) else {
-        return;
+        return  Err(format!("Couldn't get state of pokemon {}", source_nickname));
     };
     let pokemon_status = pokemon.condition.status.clone();
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
@@ -52,6 +52,7 @@ fn check_preconditions(
             is_beneficial: true,
         });
     }
+    Ok(())
 }
 
 fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bool) {
@@ -96,7 +97,7 @@ fn record_move_luck_events(
     sublines: &[SubLine],
     current_turn: u32,
     (has_miss_subline, has_secondary_subline): (bool, bool),
-) {
+) -> Result<(), String> {
     let source_player = source_pokemon.player.as_str();
     let source_nickname = &source_pokemon.pokemon_nickname;
     
@@ -117,7 +118,7 @@ fn record_move_luck_events(
 
     
     let Some(player_state) = state.get_player_state_mut(source_player) else {
-        return;
+        return Err(format!("Couldn't get state of player {}", source_player));
     };
     
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
@@ -180,6 +181,7 @@ fn record_move_luck_events(
     }
 
     player_state.add_luck_events(luck_events);
+    Ok(())
 }
 
 fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &str, missed: bool) {
@@ -200,14 +202,19 @@ pub fn process_move(
     move_name: &str,
     target_pokemon: &PokemonRef,
     sublines: &[SubLine],
-) {
+) -> Result<(), String> {
     let source_player = source_pokemon.player.as_str();
     let source_nickname = &source_pokemon.pokemon_nickname;
     let current_turn = state.turn;
 
-    check_preconditions(state, source_player, source_nickname, current_turn);
+    match check_preconditions(state, source_player, source_nickname, current_turn) {
+        Ok(()) => {},
+        Err(err) => { return Err(err) }
+    };
+    
     let (has_miss_subline, has_secondary_subline) = apply_move_sublines(state, sublines);
-    record_move_luck_events(
+
+    match record_move_luck_events(
         state,
         source_pokemon,
         move_name,
@@ -215,6 +222,11 @@ pub fn process_move(
         sublines,
         current_turn,
         (has_miss_subline, has_secondary_subline),
-    );
+    ) {
+        Ok(()) => {},
+        Err(err) => { return Err(err) }
+    };
+    
     set_pending_flinch(state, source_player, move_name, has_miss_subline);
+    Ok(())
 }
