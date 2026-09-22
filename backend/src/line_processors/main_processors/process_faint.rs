@@ -1,14 +1,16 @@
 use crate::schema::lines::PokemonRef;
 use crate::schema::state::GameState;
 
-pub fn handle_detailschange(state: &mut GameState, source_pokemon: &PokemonRef, new_form: &str) {
+pub fn process_faint(state: &mut GameState, source_pokemon: &PokemonRef) {
     let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {
         return;
     };
 
-    player_state.active_pokemon = Some(source_pokemon.pokemon_nickname.clone());
+    if player_state.active_pokemon.as_deref() == Some(&source_pokemon.pokemon_nickname) {
+        player_state.active_pokemon = None;
+    }
 
     if let Some(pokemon_state) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
-        pokemon_state.identity.species = new_form.to_string();
+        pokemon_state.condition.is_fainted = true;
     }
 }

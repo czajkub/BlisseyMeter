@@ -1,6 +1,6 @@
 use crate::schema::state::{GameState, PokemonState};
 
-pub fn handle_poke(state: &mut GameState, player_name: &str, poke_name: &str, gender: &str) {
+pub fn process_poke(state: &mut GameState, player_name: &str, poke_name: &str, gender: &str) {
     let Some(player_state) = state.get_player_state_mut(player_name) else {
         return;
     };

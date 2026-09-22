@@ -1,7 +1,7 @@
 use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
-use crate::handlers::sub_handlers::{handle_boost, handle_status};
+use crate::line_processors::sub_processors::{process_boost, process_status};
 use crate::schema::lines::{PokemonRef, SubLine};
 use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
@@ -67,7 +67,7 @@ fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bo
                 amount,
             } => {
                 has_secondary_subline = true;
-                handle_boost(state, target, stat, *amount);
+                process_boost(state, target, stat, *amount);
             }
             SubLine::Unboost {
                 target,
@@ -75,11 +75,11 @@ fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bo
                 amount,
             } => {
                 has_secondary_subline = true;
-                handle_boost(state, target, stat, -*amount);
+                process_boost(state, target, stat, -*amount);
             }
             SubLine::Status { target, status, .. } => {
                 has_secondary_subline = true;
-                handle_status(state, target, status.as_ref());
+                process_status(state, target, status.as_ref());
             }
             _ => {}
         }
@@ -194,7 +194,7 @@ fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &st
     }
 }
 
-pub fn handle_move(
+pub fn process_move(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     move_name: &str,

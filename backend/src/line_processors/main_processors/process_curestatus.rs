@@ -2,7 +2,7 @@ use crate::constants::luck_weights::STATUS_WEIGHT;
 use crate::schema::lines::PokemonRef;
 use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
-pub fn handle_curestatus(
+pub fn process_curestatus(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     status_str: Option<&Status>,

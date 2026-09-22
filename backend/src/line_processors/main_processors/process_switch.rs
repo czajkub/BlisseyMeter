@@ -1,7 +1,7 @@
 use crate::schema::lines::{Hp, PokemonRef};
 use crate::schema::state::{GameState, PokemonState};
 
-pub fn handle_switch(state: &mut GameState, source_pokemon: &PokemonRef, species: &str, hp: &Hp) {
+pub fn process_switch(state: &mut GameState, source_pokemon: &PokemonRef, species: &str, hp: &Hp) {
     let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {
         return;
     };

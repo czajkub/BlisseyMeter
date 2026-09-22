@@ -2,7 +2,7 @@ use crate::constants::luck_weights::{SECONDARY_EFFECT_WEIGHT, STATUS_WEIGHT};
 use crate::schema::lines::PokemonRef;
 use crate::schema::state::{GameState, LuckCategory, LuckEvent};
 
-fn handle_flinch(
+fn process_flinch(
     state: &mut GameState,
     target_player: &str,
     target_nickname: &str,
@@ -55,7 +55,7 @@ fn handle_flinch(
     }
 }
 
-fn handle_paralysis(state: &mut GameState, player: &str, nickname: &str, current_turn: u32) {
+fn process_paralysis(state: &mut GameState, player: &str, nickname: &str, current_turn: u32) {
     let pokemon_display = state
         .get_player_state(player)
         .map(|state| state.pokemon_display_name(nickname))
@@ -74,7 +74,7 @@ fn handle_paralysis(state: &mut GameState, player: &str, nickname: &str, current
     }
 }
 
-fn handle_sleep(state: &mut GameState, player: &str) {
+fn process_sleep(state: &mut GameState, player: &str) {
     if let Some(player_state) = state.get_player_state_mut(player)
         && let Some(active_mon_state) = player_state.get_active_pokemon_state_mut()
     {
@@ -82,7 +82,7 @@ fn handle_sleep(state: &mut GameState, player: &str) {
     }
 }
 
-pub fn handle_cant(
+pub fn process_cant(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     reason: &str,
@@ -92,9 +92,9 @@ pub fn handle_cant(
     let nickname = &source_pokemon.pokemon_nickname;
 
     match reason {
-        "flinch" => handle_flinch(state, player, nickname, source, state.turn),
-        "par" => handle_paralysis(state, player, nickname, state.turn),
-        "slp" => handle_sleep(state, player),
+        "flinch" => process_flinch(state, player, nickname, source, state.turn),
+        "par" => process_paralysis(state, player, nickname, state.turn),
+        "slp" => process_sleep(state, player),
         _ => {}
     }
 }

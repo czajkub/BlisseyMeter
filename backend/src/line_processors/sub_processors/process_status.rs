@@ -2,7 +2,7 @@ use crate::schema::lines::PokemonRef;
 use crate::schema::state::GameState;
 use crate::schema::state::Status;
 
-pub fn handle_status(state: &mut GameState, target: &PokemonRef, status: Option<&Status>) {
+pub fn process_status(state: &mut GameState, target: &PokemonRef, status: Option<&Status>) {
     let Some(pokemon) = state.get_pokemon_mut(target) else {
         return;
     };

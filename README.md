@@ -111,7 +111,7 @@ Every event has:
 
 ### Planned / reserved but not yet emitted
 
-The `LuckCategory` enum already declares these variants, but no handler produces them yet:
+The `LuckCategory` enum already declares these variants, but no processor produces them yet:
 
 - **DamageRoll** — low/high damage variance rolls (the 85%–100% multiplier).
 - **AbilityProc** — random on-activation abilities (Static, Flame Body, Effect Spore, Cute Charm,

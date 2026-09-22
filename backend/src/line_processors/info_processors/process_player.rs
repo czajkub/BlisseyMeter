@@ -1,6 +1,6 @@
 use crate::schema::state::GameState;
 
-pub fn handle_player(
+pub fn process_player(
     state: &mut GameState,
     player: Option<&str>,
     name: Option<&str>,

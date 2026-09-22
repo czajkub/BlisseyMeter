@@ -1,7 +1,7 @@
 use crate::schema::lines::PokemonRef;
 use crate::schema::state::GameState;
 
-pub fn handle_boost(state: &mut GameState, target: &PokemonRef, stat: &str, amount: i8) {
+pub fn process_boost(state: &mut GameState, target: &PokemonRef, stat: &str, amount: i8) {
     let Some(pokemon) = state.get_pokemon_mut(target) else {
         return;
     };

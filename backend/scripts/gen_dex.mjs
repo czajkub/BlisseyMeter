@@ -199,7 +199,7 @@ function buildMoves(moves) {
 const DAMAGE_TAKEN_MULTIPLIER = { 0: 1, 1: 2, 2: 0.5, 3: 0 };
 
 // `damageTaken` also carries non-type pseudo-keys (`prankster`, `Brn`, `Par`,
-// `Trapped`, `Powder`, ...) for ability/status interactions. Those are handled
+// `Trapped`, `Powder`, ...) for ability/status interactions. Those are processed
 // by code in Rust, so only real types are kept here.
 const TYPES = new Set([
   "Bug",

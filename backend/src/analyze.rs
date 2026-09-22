@@ -320,7 +320,7 @@ pub async fn analyze(
 
     for line in info_lines {
         if let Line::Info(info_line) = line {
-            crate::handlers::info_handlers::handle_info_line(&mut game_state, &info_line);
+            crate::line_processors::info_processors::process_info_line(&mut game_state, &info_line);
         }
     }
 
@@ -341,11 +341,11 @@ pub async fn analyze(
     for line in game_lines {
         match line {
             Line::Main(main_line) => {
-                crate::handlers::main_handlers::handle_main_line(&mut game_state, &main_line);
+                crate::line_processors::main_processors::process_main_line(&mut game_state, &main_line);
             }
             Line::Info(InfoLine::Turn { turn }) => game_state.turn = turn,
             Line::Info(info_line) => {
-                crate::handlers::info_handlers::handle_info_line(&mut game_state, &info_line)
+                crate::line_processors::info_processors::process_info_line(&mut game_state, &info_line)
             }
             Line::Sub(_) => {} 
             Line::Unknown => {
