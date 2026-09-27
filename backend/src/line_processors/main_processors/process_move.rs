@@ -55,13 +55,15 @@ fn check_preconditions(
     Ok(())
 }
 
-fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bool) {
+fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bool, bool) {
     let mut has_miss_subline = false;
+    let mut has_fail_subline = false;
     let mut has_secondary_subline = false;
 
     for subline in sublines {
         match subline {
             SubLine::Miss { .. } => has_miss_subline = true,
+            SubLine::Fail { .. } => has_fail_subline = true,
             SubLine::Boost {
                 target,
                 stat,
@@ -86,7 +88,7 @@ fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bo
         }
     }
 
-    (has_miss_subline, has_secondary_subline)
+    (has_secondary_subline, has_miss_subline, has_fail_subline)
 }
 
 fn record_move_luck_events(
@@ -96,7 +98,7 @@ fn record_move_luck_events(
     target_pokemon: &PokemonRef,
     sublines: &[SubLine],
     current_turn: u32,
-    (has_miss_subline, has_secondary_subline): (bool, bool),
+    (has_secondary_subline, has_miss_subline, has_fail_subline): (bool, bool, bool),
 ) -> Result<(), String> {
     let source_player = source_pokemon.player.as_str();
     let source_nickname = &source_pokemon.pokemon_nickname;
@@ -124,7 +126,7 @@ fn record_move_luck_events(
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
     let mut luck_events = Vec::new();
 
-    if !has_miss_subline
+    if !(has_miss_subline || has_fail_subline)
         && secondary_effect_chance > 0
         && secondary_effect_chance < 100
         && !has_secondary_subline
@@ -212,7 +214,7 @@ pub fn process_move(
         Err(err) => { return Err(err) }
     };
     
-    let (has_miss_subline, has_secondary_subline) = apply_move_sublines(state, sublines);
+    let (has_secondary_subline, has_miss_subline, has_fail_subline) = apply_move_sublines(state, sublines);
 
     match record_move_luck_events(
         state,
@@ -221,7 +223,7 @@ pub fn process_move(
         target_pokemon,
         sublines,
         current_turn,
-        (has_miss_subline, has_secondary_subline),
+        (has_secondary_subline, has_miss_subline, has_fail_subline),
     ) {
         Ok(()) => {},
         Err(err) => { return Err(err) }

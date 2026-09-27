@@ -184,6 +184,14 @@ fn parse_line(line: &str) -> Line {
             let source = parse_pokemon(field(&mut fields));
             let target = parse_pokemon(field(&mut fields));
             match (source, target) {
+                (Some(source), target) => Line::Sub(SubLine::Fail { source, target }),
+                _ => Line::Unknown,
+            }
+        }
+        "-fail" => {
+            let source = parse_pokemon(field(&mut fields));
+            let target = parse_pokemon(field(&mut fields));
+            match (source, target) {
                 (Some(source), Some(target)) => Line::Sub(SubLine::Miss { source, target }),
                 _ => Line::Unknown,
             }

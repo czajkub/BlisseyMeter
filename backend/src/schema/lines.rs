@@ -56,6 +56,7 @@ pub enum SubLine {
     Unboost { target: PokemonRef, stat: String, amount: i8 },
     Status { target: PokemonRef, status: Option<Status>, from: Option<String> },
     Miss { source: PokemonRef, target: PokemonRef },
+    Fail { source: PokemonRef, target: Option<PokemonRef> },
     Crit { target: PokemonRef },
     Resisted { target: PokemonRef },
     SuperEffective { target: PokemonRef },
