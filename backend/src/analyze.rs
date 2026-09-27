@@ -1,5 +1,7 @@
+use regex::Regex;
+
 use crate::schema::lines::{
-    Hp, InfoLine, Line, MainLine, MainLineKind, PlayerId, PokemonRef, SubLine,
+    Hp, InfoLine, Line, MainLine, MainLineKind, MoveTag, PlayerId, PokemonRef, SubLine,
 };
 use crate::schema::state::{GameState, Weather};
 use crate::pokepaste_parser::parse_pokepastes;
@@ -57,16 +59,22 @@ fn parse_line(line: &str) -> Line {
             let source_pokemon = parse_pokemon(field(&mut fields));
             let move_name = field(&mut fields).to_string();
             let target = parse_pokemon(field(&mut fields));
-            match (source_pokemon, target) {
-                (Some(source_pokemon), Some(target)) => Line::Main(MainLine {
+            let tag_re = Regex::new(r"\[([a-z]+)\]").expect("valid move tag regex");
+            let tag = tag_re
+                .captures_iter(line)
+                .filter_map(|cap| MoveTag::from_str(&cap[1]))
+                .next();
+            match source_pokemon {
+                Some(source_pokemon) => Line::Main(MainLine {
                     kind: MainLineKind::Move {
                         source_pokemon,
                         move_name,
                         target,
+                        tag,
                     },
                     sublines: Vec::new(),
                 }),
-                _ => Line::Unknown,
+                None => Line::Unknown,
             }
         }
         "faint" => parse_pokemon(field(&mut fields))
@@ -180,20 +188,22 @@ fn parse_line(line: &str) -> Line {
                 })
             })
             .unwrap_or(Line::Unknown),
+        /* this is useless now that we parse miss tag from move line
         "-miss" => {
-            let source = parse_pokemon(field(&mut fields));
-            let target = parse_pokemon(field(&mut fields));
-            match (source, target) {
-                (Some(source), target) => Line::Sub(SubLine::Fail { source, target }),
-                _ => Line::Unknown,
-            }
-        }
-        "-fail" => {
             let source = parse_pokemon(field(&mut fields));
             let target = parse_pokemon(field(&mut fields));
             match (source, target) {
                 (Some(source), Some(target)) => Line::Sub(SubLine::Miss { source, target }),
                 _ => Line::Unknown,
+            }
+        }
+        */
+        "-fail" => {
+            let source = parse_pokemon(field(&mut fields));
+            let reason = non_empty(field(&mut fields));
+            match source {
+                Some(source) => Line::Sub(SubLine::Fail { source, reason }),
+                None => Line::Unknown,
             }
         }
         "-crit" | "-resisted" | "-supereffective" | "-immune" => parse_pokemon(field(&mut fields))

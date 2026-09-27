@@ -26,7 +26,8 @@ pub fn process_main_line(state: &mut GameState, line: &MainLine) -> Result<(), S
             source_pokemon,
             move_name,
             target,
-        } => process_move(state, source_pokemon, move_name, target, &line.sublines),
+            tag,
+        } => process_move(state, source_pokemon, move_name, target.as_ref(), tag, &line.sublines),
         MainLineKind::Faint { source_pokemon } => process_faint(state, source_pokemon),
         MainLineKind::DetailsChange {
             source_pokemon,

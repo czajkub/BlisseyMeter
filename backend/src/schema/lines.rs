@@ -24,7 +24,8 @@ pub enum MainLineKind {
     Move {
         source_pokemon: PokemonRef,
         move_name: String,
-        target: PokemonRef,
+        target: Option<PokemonRef>,
+        tag: Option<MoveTag>,
     },
     Faint {
         source_pokemon: PokemonRef,
@@ -48,6 +49,30 @@ pub enum MainLineKind {
     },
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MoveTag {
+    // charging turns, failed self-target moves, no-ops
+    Still,
+    // failed accuracy check
+    Miss,
+    // target no longer exists (e.g. died before move use)
+    NoTarget,
+    // release turn of a charged move, lke solar beam
+    LockedMove,
+}
+
+impl MoveTag {
+    pub fn from_str(value: &str) -> Option<Self> {
+        match value {
+            "still" => Some(Self::Still),
+            "miss" => Some(Self::Miss),
+            "notarget" => Some(Self::NoTarget),
+            "lockedmove" => Some(Self::LockedMove),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum SubLine {
     Damage { target: PokemonRef, hp: Hp, source: Option<String> },
@@ -56,7 +81,7 @@ pub enum SubLine {
     Unboost { target: PokemonRef, stat: String, amount: i8 },
     Status { target: PokemonRef, status: Option<Status>, from: Option<String> },
     Miss { source: PokemonRef, target: PokemonRef },
-    Fail { source: PokemonRef, target: Option<PokemonRef> },
+    Fail { source: PokemonRef, reason: Option<String> },
     Crit { target: PokemonRef },
     Resisted { target: PokemonRef },
     SuperEffective { target: PokemonRef },

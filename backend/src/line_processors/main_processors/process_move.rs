@@ -2,7 +2,7 @@ use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
 use crate::line_processors::sub_processors::{process_boost, process_status};
-use crate::schema::lines::{PokemonRef, SubLine};
+use crate::schema::lines::{MoveTag, PokemonRef, SubLine};
 use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
 
 fn check_preconditions(
@@ -55,21 +55,34 @@ fn check_preconditions(
     Ok(())
 }
 
-fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bool, bool) {
-    let mut has_miss_subline = false;
-    let mut has_fail_subline = false;
-    let mut has_secondary_subline = false;
+#[derive(Default)]
+struct MovePeculiarities { // this is genuinely an awful name
+    has_secondary_sublines: bool,
+    has_missed: bool,
+    has_failed: bool,
+    is_still: bool,
+    no_target: bool,
+    locked_move: bool,
+}
+
+impl MovePeculiarities {
+    pub fn has_succeeded(&self) -> bool {
+        !self.has_missed && !self.has_failed && !self.is_still && !self.no_target
+    }
+}
+
+fn apply_move_peculiarities(state: &mut GameState, tag: &Option<MoveTag>, sublines: &[SubLine]) -> MovePeculiarities {
+    let mut peculiarities = MovePeculiarities::default();
 
     for subline in sublines {
         match subline {
-            SubLine::Miss { .. } => has_miss_subline = true,
-            SubLine::Fail { .. } => has_fail_subline = true,
+            SubLine::Fail { .. } => peculiarities.has_failed = true,
             SubLine::Boost {
                 target,
                 stat,
                 amount,
             } => {
-                has_secondary_subline = true;
+                peculiarities.has_secondary_sublines = true;
                 process_boost(state, target, stat, *amount);
             }
             SubLine::Unboost {
@@ -77,28 +90,40 @@ fn apply_move_sublines(state: &mut GameState, sublines: &[SubLine]) -> (bool, bo
                 stat,
                 amount,
             } => {
-                has_secondary_subline = true;
+                peculiarities.has_secondary_sublines = true;
                 process_boost(state, target, stat, -*amount);
             }
             SubLine::Status { target, status, .. } => {
-                has_secondary_subline = true;
+                peculiarities.has_secondary_sublines = true;
                 process_status(state, target, status.as_ref());
             }
             _ => {}
         }
     }
 
-    (has_secondary_subline, has_miss_subline, has_fail_subline)
+    match tag {
+        Some(tag) => {
+            match tag {
+                MoveTag::Miss => { peculiarities.has_missed = true; }
+                MoveTag::Still => { peculiarities.is_still = true; }
+                MoveTag::NoTarget => { peculiarities.no_target = true; }
+                MoveTag::LockedMove => { peculiarities.locked_move = true; }
+            }
+        }
+        None => { }
+    }
+
+    peculiarities
 }
 
 fn record_move_luck_events(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     move_name: &str,
-    target_pokemon: &PokemonRef,
+    target_pokemon: Option<&PokemonRef>,
     sublines: &[SubLine],
     current_turn: u32,
-    (has_secondary_subline, has_miss_subline, has_fail_subline): (bool, bool, bool),
+    move_result: &MovePeculiarities,
 ) -> Result<(), String> {
     let source_player = source_pokemon.player.as_str();
     let source_nickname = &source_pokemon.pokemon_nickname;
@@ -107,11 +132,14 @@ fn record_move_luck_events(
     
     let move_accuracy = move_data.map_or(
         100.0,
-        |data| data.get_accuracy_with_modifiers(
-            &state,
-            source_pokemon,
-            target_pokemon,
-        )
+        |data| match target_pokemon {
+            Some(target_pokemon) => data.get_accuracy_with_modifiers(
+                &state,
+                source_pokemon,
+                target_pokemon,
+            ),
+            None => data.get_accuracy(),
+        }
     );
 
     let secondary_effect_chance = move_data
@@ -125,11 +153,11 @@ fn record_move_luck_events(
     
     let pokemon_display = player_state.pokemon_display_name(source_nickname);
     let mut luck_events = Vec::new();
-
-    if !(has_miss_subline || has_fail_subline)
+    
+    if move_result.has_succeeded()
         && secondary_effect_chance > 0
         && secondary_effect_chance < 100
-        && !has_secondary_subline
+        && !move_result.has_secondary_sublines
     {
         luck_events.push(LuckEvent {
             turn: current_turn,
@@ -186,8 +214,8 @@ fn record_move_luck_events(
     Ok(())
 }
 
-fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &str, missed: bool) {
-    if missed {
+fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &str, has_succeeded: bool) {
+    if !has_succeeded {
         return;
     }
     if let Some(&(flinch_move, flinch_chance)) =
@@ -202,7 +230,8 @@ pub fn process_move(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
     move_name: &str,
-    target_pokemon: &PokemonRef,
+    target_pokemon: Option<&PokemonRef>,
+    tag: &Option<MoveTag>,
     sublines: &[SubLine],
 ) -> Result<(), String> {
     let source_player = source_pokemon.player.as_str();
@@ -214,7 +243,7 @@ pub fn process_move(
         Err(err) => { return Err(err) }
     };
     
-    let (has_secondary_subline, has_miss_subline, has_fail_subline) = apply_move_sublines(state, sublines);
+    let move_peculiarities = apply_move_peculiarities(state, tag, sublines);
 
     match record_move_luck_events(
         state,
@@ -223,12 +252,12 @@ pub fn process_move(
         target_pokemon,
         sublines,
         current_turn,
-        (has_secondary_subline, has_miss_subline, has_fail_subline),
+        &move_peculiarities,
     ) {
         Ok(()) => {},
         Err(err) => { return Err(err) }
     };
     
-    set_pending_flinch(state, source_player, move_name, has_miss_subline);
+    set_pending_flinch(state, source_player, move_name, move_peculiarities.has_succeeded());
     Ok(())
 }
