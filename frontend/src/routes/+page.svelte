@@ -175,6 +175,14 @@
 		return rounded > 0 ? `+${rounded}` : `${rounded}`;
 	};
 
+	const eventScoreColor = (event: { score: number; is_beneficial: boolean }) =>
+		scoreColor(event.is_beneficial ? Math.abs(event.score) : -Math.abs(event.score));
+
+	const eventScoreLabel = (event: { score: number; is_beneficial: boolean }) => {
+		const magnitude = Math.round(Math.abs(event.score) * 100) / 100;
+		return `${event.is_beneficial ? '+' : '−'}${magnitude}`;
+	};
+
 	function toLogUrl(url: string): string {
 		// Strip trailing slashes and add https:// if no scheme was given.
 		let trimmed = url.trim().replace(/\/+$/, '');
@@ -445,7 +453,10 @@
 			{/each}
 			{#if minor.length > 0}
 				{@const expanded = expandedMinor.has(name)}
-				{@const net = minor.reduce((sum, e) => sum + e.score, 0)}
+				{@const net = minor.reduce(
+					(sum, e) => sum + (e.is_beneficial ? Math.abs(e.score) : -Math.abs(e.score)),
+					0
+				)}
 				{@const firstTurn = minor[0].turn}
 				{@const lastTurn = minor[minor.length - 1].turn}
 				<button
@@ -508,8 +519,8 @@
 						<span class="move">{event.source_move}</span>
 					{/if}
 				</div>
-				<span class="score-badge" style="color: {scoreColor(event.score)}">
-					{scoreLabel(event.score)}
+				<span class="score-badge" style="color: {eventScoreColor(event)}">
+					{eventScoreLabel(event)}
 				</span>
 			</div>
 			<p class="description">{event.description}</p>
