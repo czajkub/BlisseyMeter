@@ -1,3 +1,5 @@
+pub mod lines;
+
 mod field;
 mod game;
 mod luck;

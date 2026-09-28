@@ -1,5 +1,5 @@
-use crate::schema::lines::PokemonRef;
-use crate::schema::state::GameState;
+use crate::models::lines::PokemonRef;
+use crate::models::GameState;
 
 pub fn process_detailschange(
     state: &mut GameState,

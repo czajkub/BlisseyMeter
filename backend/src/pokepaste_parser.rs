@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use regex::Regex;
 
 use crate::constants::moves;
-use crate::schema::state::{EvSpread, IvSpread, PokemonSet};
+use crate::models::{EvSpread, IvSpread, PokemonSet};
 
 #[derive(Debug, Clone)]
 pub struct ParsedPokemon {

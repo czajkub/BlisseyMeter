@@ -1,4 +1,4 @@
-use crate::schema::state::GameState;
+use crate::models::GameState;
 
 pub fn process_player(
     state: &mut GameState,

@@ -1,5 +1,5 @@
-use crate::schema::lines::{Hp, PokemonRef};
-use crate::schema::state::{GameState};
+use crate::models::lines::{Hp, PokemonRef};
+use crate::models::{GameState};
 
 pub fn process_switch(state: &mut GameState, source_pokemon: &PokemonRef, species: &str, hp: &Hp) -> Result<(), String> {
     let Some(player_state) = state.get_player_state_mut(source_pokemon.player.as_str()) else {

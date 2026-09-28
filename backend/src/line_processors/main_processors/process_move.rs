@@ -2,8 +2,8 @@ use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
 use crate::line_processors::sub_processors::{process_boost, process_status};
-use crate::schema::lines::{MoveTag, PokemonRef, SubLine};
-use crate::schema::state::{GameState, LuckCategory, LuckEvent, Status};
+use crate::models::lines::{MoveTag, PokemonRef, SubLine};
+use crate::models::{GameState, LuckCategory, LuckEvent, Status};
 
 fn check_preconditions(
     state: &mut GameState,

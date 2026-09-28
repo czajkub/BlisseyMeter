@@ -1,5 +1,5 @@
 use backend::analyze::analyze;
-use backend::schema::state::{GameState, LuckCategory, LuckEvent};
+use backend::models::{GameState, LuckCategory, LuckEvent};
 
 pub const OPENING_LINES: Vec<String> = &[
     "|player|p1|Adam|",

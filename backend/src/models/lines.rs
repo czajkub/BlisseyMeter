@@ -1,4 +1,4 @@
-use crate::schema::state::{Status, Weather};
+use crate::models::{Status, Weather};
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -97,6 +97,7 @@ pub enum InfoLine {
     Turn {
         turn: u32,
     },
+    Upkeep { },
     Player {
         player: Option<String>,
         name: Option<String>,

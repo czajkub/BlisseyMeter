@@ -26,6 +26,11 @@ pub enum Weather {
     DeltaStream,
 }
 
+/*
+ * When weather is better implemented
+ * its turn count also needs to be added
+ * and incremented in upkeep processing
+ */
 impl Weather {
     pub fn from_log(value: &str) -> Self {
         match value {

@@ -1,5 +1,5 @@
-use crate::schema::lines::{MainLine, MainLineKind};
-use crate::schema::state::GameState;
+use crate::models::lines::{MainLine, MainLineKind};
+use crate::models::GameState;
 
 pub mod process_cant;
 pub mod process_curestatus;

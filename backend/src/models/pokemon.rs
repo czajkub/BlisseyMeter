@@ -116,6 +116,20 @@ impl PokemonState {
     pub fn increment_status_turns(&mut self) {
         self.condition.status_turns += 1;
     }
+
+    pub fn clear_pending_flinch(&mut self) {
+        self.pending.flinch_chance = None;
+    }
+
+    pub fn take_sleep_turns(&mut self) -> Option<u32> {
+        if self.condition.status != Some(Status::Sleep) {
+            return None;
+        }
+        let turns = self.condition.status_turns;
+        self.condition.status = None;
+        self.condition.status_turns = 0;
+        Some(turns)
+    }
 }
 
 impl Stats<i8> {

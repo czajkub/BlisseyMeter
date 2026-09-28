@@ -1,7 +1,7 @@
 use std::env;
 use dotenv::dotenv;
 use serde::{Deserialize, Serialize};
-use backend::schema::state::LuckEvent;
+use backend::models::LuckEvent;
 
 use axum::{
     routing::{get, post},

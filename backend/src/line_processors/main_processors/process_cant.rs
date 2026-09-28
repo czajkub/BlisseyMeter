@@ -1,12 +1,12 @@
 use crate::constants::luck_weights::{SECONDARY_EFFECT_WEIGHT, STATUS_WEIGHT};
-use crate::schema::lines::PokemonRef;
-use crate::schema::state::{GameState, LuckCategory, LuckEvent};
+use crate::models::lines::PokemonRef;
+use crate::models::{GameState, LuckCategory, LuckEvent};
 
 fn process_flinch(
     state: &mut GameState,
     target_player: &str,
     target_nickname: &str,
-    source: Option<&crate::schema::lines::PokemonRef>,
+    source: Option<&crate::models::lines::PokemonRef>,
     current_turn: u32,
 ) -> Result<(), String> {
     let target_display = state
@@ -81,16 +81,6 @@ fn process_paralysis(
     Ok(())
 }
 
-fn process_sleep(state: &mut GameState, player: &str) -> Result<(), String> {
-    if let Some(player_state) = state.get_player_state_mut(player)
-        && let Some(active_mon_state) = player_state.get_active_pokemon_state_mut()
-    {
-        active_mon_state.increment_status_turns();
-    }
-    
-    Ok(())
-}
-
 pub fn process_cant(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
@@ -103,7 +93,6 @@ pub fn process_cant(
     match reason {
         "flinch" => process_flinch(state, player, nickname, source, state.turn),
         "par" => process_paralysis(state, player, nickname, state.turn),
-        "slp" => process_sleep(state, player),
         _ => Ok(())
     }
 }

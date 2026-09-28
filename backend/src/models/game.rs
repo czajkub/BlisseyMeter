@@ -1,4 +1,4 @@
-use crate::schema::lines::PokemonRef;
+use crate::models::lines::PokemonRef;
 
 use super::{FieldState, PlayerState, PokemonState};
 

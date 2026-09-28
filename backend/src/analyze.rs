@@ -1,9 +1,9 @@
 use regex::Regex;
 
-use crate::schema::lines::{
+use crate::models::lines::{
     Hp, InfoLine, Line, MainLine, MainLineKind, MoveTag, PlayerId, PokemonRef, SubLine,
 };
-use crate::schema::state::{GameState, Weather};
+use crate::models::{GameState, Weather};
 use crate::pokepaste_parser::parse_pokepastes;
 
 fn field<'a>(fields: &mut impl Iterator<Item = &'a str>) -> &'a str {
@@ -124,7 +124,7 @@ fn parse_line(line: &str) -> Line {
                 Line::Main(MainLine {
                     kind: MainLineKind::CureStatus {
                         source_pokemon,
-                        cured_status: crate::schema::state::Status::from_str(field(&mut fields)),
+                        cured_status: crate::models::Status::from_str(field(&mut fields)),
                         meta: field(&mut fields).to_string(),
                     },
                     sublines: Vec::new(),
@@ -140,6 +140,12 @@ fn parse_line(line: &str) -> Line {
         "turn" => Line::Info(InfoLine::Turn {
             turn: field(&mut fields).parse().unwrap_or(0),
         }),
+        "upkeep" => Line::Info(InfoLine::Upkeep{}),
+        "player" => Line::Info(InfoLine::Player {
+            player: non_empty(field(&mut fields)),
+            name: non_empty(field(&mut fields)),
+            avatar: non_empty(field(&mut fields)),
+        }),
         "poke" => {
             let player = field(&mut fields).to_string();
             let mut poke = field(&mut fields).split(',');
@@ -149,11 +155,7 @@ fn parse_line(line: &str) -> Line {
                 gender: poke.next().unwrap_or_default().trim().to_string(),
             })
         }
-        "player" => Line::Info(InfoLine::Player {
-            player: non_empty(field(&mut fields)),
-            name: non_empty(field(&mut fields)),
-            avatar: non_empty(field(&mut fields)),
-        }),
+        
         "-damage" | "-heal" => {
             let target = parse_pokemon(field(&mut fields));
             target
@@ -176,7 +178,7 @@ fn parse_line(line: &str) -> Line {
             .map(|target| {
                 Line::Sub(SubLine::Status {
                     target,
-                    status: crate::schema::state::Status::from_str(field(&mut fields)),
+                    status: crate::models::Status::from_str(field(&mut fields)),
                     from: fields.next().map(|value| {
                         value
                             .trim()
@@ -340,6 +342,12 @@ pub async fn analyze(
     lines: Vec<String>,
     p1_pokepaste: Option<String>,
     p2_pokepaste: Option<String>,
+    /* 
+     * if jump-in replays will be implemented
+     * probably a flag should be added to this function
+     * that will make it so that GameState is saved per turn
+     * maybe to a vec - to return corresponding current state for each turn
+    */
 ) -> GameState {
     let mut game_state = GameState::default();
     let (info_lines, game_lines) = parse_game_lines(lines);
@@ -374,7 +382,6 @@ pub async fn analyze(
                     );
                 }
             }
-            Line::Info(InfoLine::Turn { turn }) => game_state.turn = turn,
             Line::Info(info_line) => {
                 crate::line_processors::info_processors::process_info_line(&mut game_state, &info_line)
             }
@@ -383,6 +390,7 @@ pub async fn analyze(
                 // Skip unknown lines or log them
             }
         }
+        // here we can later on save the current turn's state and go on
     }
 
     game_state

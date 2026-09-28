@@ -1,6 +1,6 @@
-use crate::schema::lines::PokemonRef;
-use crate::schema::state::GameState;
-use crate::schema::state::Status;
+use crate::models::lines::PokemonRef;
+use crate::models::GameState;
+use crate::models::Status;
 
 pub fn process_status(state: &mut GameState, target: &PokemonRef, status: Option<&Status>) {
     let Some(pokemon) = state.get_pokemon_mut(target) else {

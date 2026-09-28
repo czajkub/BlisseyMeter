@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use super::{LuckEvent, PokemonSet, PokemonState};
+use crate::constants::luck_weights::STATUS_WEIGHT;
+use super::{LuckCategory, LuckEvent, PokemonSet, PokemonState};
 
 #[derive(Debug, Clone)]
 pub struct PlayerState {
@@ -111,12 +112,10 @@ impl PlayerState {
 
     pub fn clear_pending_flinch(&mut self, nickname: &str) {
         if let Some(pokemon) = self.get_pokemon_mut(nickname) {
-            pokemon.pending.flinch_chance = None;
+            pokemon.clear_pending_flinch();
         }
     }
 
-    /// Takes (and clears) the pending flinch chance from the active Pokémon,
-    /// returning (flinch_chance, source_move, active_nickname) if one was set.
     pub fn take_pending_flinch(&mut self) -> Option<(u64, String, String)> {
         let active_nick = self.active_pokemon.as_ref()?.clone();
         let pokemon = self.get_pokemon_mut(&active_nick)?;
@@ -124,10 +123,31 @@ impl PlayerState {
         Some((flinch_chance, source_move, active_nick))
     }
 
-    /// Sets a pending flinch chance on the active Pokémon.
     pub fn set_active_pending_flinch(&mut self, flinch_chance: u64, source_move: String) {
         if let Some(pokemon) = self.get_active_pokemon_state_mut() {
             pokemon.pending.flinch_chance = Some((flinch_chance, source_move));
         }
+    }
+
+    pub fn resolve_sleep_luck(&mut self, nickname: &str, current_turn: u32, cause: &str) {
+        let display = self.pokemon_display_name(nickname);
+        let Some(turns) = self.get_pokemon_mut(nickname).and_then(|p| p.take_sleep_turns()) else {
+            return;
+        };
+        if turns == 0 {
+            return;
+        }
+    
+        let capped = turns.min(3);
+        let wake_up_luck = 1.0 / 3.0 * (2.0 - capped as f64);
+        self.add_luck_event(LuckEvent {
+            turn: current_turn,
+            pokemon: display,
+            category: LuckCategory::StatusTurn,
+            score: STATUS_WEIGHT * wake_up_luck,
+            description: format!("{cause} after {capped} sleep turn(s)"),
+            source_move: None,
+            is_beneficial: wake_up_luck > 0.0,
+        });
     }
 }

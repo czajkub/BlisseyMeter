@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 use std::cmp::max;
 
-use crate::schema::lines::PokemonRef;
-use crate::schema::state::{GameState, Weather};
+use crate::models::lines::PokemonRef;
+use crate::models::{GameState, Weather};
 
 #[derive(Debug, serde::Deserialize, Clone)]
 pub struct Move {
