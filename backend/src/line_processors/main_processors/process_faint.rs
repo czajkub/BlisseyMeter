@@ -6,11 +6,11 @@ pub fn process_faint(state: &mut GameState, source_pokemon: &PokemonRef) -> Resu
         return Err(format!("Couldn't get state of player {}", source_pokemon.player.as_str()));
     };
 
-    if player_state.active_pokemon.as_deref() == Some(&source_pokemon.pokemon_nickname) {
-        player_state.active_pokemon = None;
+    if player_state.is_active_pokemon(&source_pokemon.pokemon_nickname) {
+        player_state.clear_active_pokemon();
     }
 
-    if let Some(pokemon_state) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
+    if let Some(pokemon_state) = player_state.get_pokemon_mut(&source_pokemon.pokemon_nickname) {
         pokemon_state.condition.is_fainted = true;
     }
     

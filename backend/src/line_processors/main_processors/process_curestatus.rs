@@ -18,8 +18,7 @@ pub fn process_curestatus(
     };
     let pokemon_display = player_state.pokemon_display_name(&source_pokemon.pokemon_nickname);
     let Some(status_turns) = player_state
-        .team
-        .get(&source_pokemon.pokemon_nickname)
+        .get_pokemon(&source_pokemon.pokemon_nickname)
         .map(|pokemon| pokemon.condition.status_turns)
     else {
         return Err(format!("Couldn't get status turn counter of cured pokemon"));
@@ -46,7 +45,7 @@ pub fn process_curestatus(
         });
     }
 
-    if let Some(pokemon) = player_state.team.get_mut(&source_pokemon.pokemon_nickname) {
+    if let Some(pokemon) = player_state.get_pokemon_mut(&source_pokemon.pokemon_nickname) {
         pokemon.condition.status = None;
         pokemon.condition.status_turns = 0;
     }

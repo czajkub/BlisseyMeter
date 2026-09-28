@@ -29,7 +29,7 @@ pub fn process_switch(state: &mut GameState, source_pokemon: &PokemonRef, specie
     pokemon.condition.max_hp = hp.max;
 
     player_state.team.insert(nickname.clone(), pokemon);
-    player_state.active_pokemon = Some(nickname.clone());
+    player_state.set_active_pokemon(nickname);
 
     Ok(())
 }

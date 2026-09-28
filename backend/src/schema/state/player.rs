@@ -48,7 +48,7 @@ impl PlayerState {
     }
 
     pub fn update_pokemon_paste(&mut self, species: &str, paste: &PokemonSet) {
-        let Some(pokemon) = self.team.get_mut(species) else {
+        let Some(pokemon) = self.get_pokemon_mut(species) else {
             return;
         };
 
@@ -62,7 +62,7 @@ impl PlayerState {
     }
 
     pub fn pokemon_display_name(&self, nickname: &str) -> String {
-        match self.team.get(nickname) {
+        match self.get_pokemon(nickname) {
             Some(p) if !p.identity.species.is_empty() && p.identity.species != nickname => {
                 format!("{nickname} ({})", p.identity.species)
             }
@@ -77,10 +77,18 @@ impl PlayerState {
         }
     }
 
+    pub fn get_pokemon(&self, nickname: &str) -> Option<&PokemonState> {
+        self.team.get(nickname)
+    }
+
+    pub fn get_pokemon_mut(&mut self, nickname: &str) -> Option<&mut PokemonState> {
+        self.team.get_mut(nickname)
+    }
+
     pub fn get_active_pokemon_state(&self) -> Option<&PokemonState> {
         self.active_pokemon
-            .as_ref()
-            .and_then(|nickname| self.team.get(nickname))
+            .as_deref()
+            .and_then(|nickname| self.get_pokemon(nickname))
     }
 
     pub fn get_active_pokemon_state_mut(&mut self) -> Option<&mut PokemonState> {
@@ -89,23 +97,37 @@ impl PlayerState {
             .and_then(|nickname| self.team.get_mut(nickname))
     }
 
+    pub fn set_active_pokemon(&mut self, nickname: &str) {
+        self.active_pokemon = Some(nickname.to_string());
+    }
+
+    pub fn clear_active_pokemon(&mut self) {
+        self.active_pokemon = None;
+    }
+
+    pub fn is_active_pokemon(&self, nickname: &str) -> bool {
+        self.active_pokemon.as_deref() == Some(nickname)
+    }
+
+    pub fn clear_pending_flinch(&mut self, nickname: &str) {
+        if let Some(pokemon) = self.get_pokemon_mut(nickname) {
+            pokemon.pending.flinch_chance = None;
+        }
+    }
+
     /// Takes (and clears) the pending flinch chance from the active Pokémon,
     /// returning (flinch_chance, source_move, active_nickname) if one was set.
     pub fn take_pending_flinch(&mut self) -> Option<(u64, String, String)> {
         let active_nick = self.active_pokemon.as_ref()?.clone();
-        let pokemon = self.team.get_mut(&active_nick)?;
+        let pokemon = self.get_pokemon_mut(&active_nick)?;
         let (flinch_chance, source_move) = pokemon.pending.flinch_chance.take()?;
         Some((flinch_chance, source_move, active_nick))
     }
 
     /// Sets a pending flinch chance on the active Pokémon.
     pub fn set_active_pending_flinch(&mut self, flinch_chance: u64, source_move: String) {
-        let Some(active_nick) = self.active_pokemon.clone() else {
-            return;
-        };
-        let Some(pokemon) = self.team.get_mut(&active_nick) else {
-            return;
-        };
-        pokemon.pending.flinch_chance = Some((flinch_chance, source_move));
+        if let Some(pokemon) = self.get_active_pokemon_state_mut() {
+            pokemon.pending.flinch_chance = Some((flinch_chance, source_move));
+        }
     }
 }

@@ -35,7 +35,7 @@ fn check_preconditions(
     let Some(player_state) = state.get_player_state_mut(source_player) else {
         return Err(format!("Couldn't get state of player {}", source_player));
     };
-    let Some(pokemon) = player_state.team.get(source_nickname) else {
+    let Some(pokemon) = player_state.get_pokemon(source_nickname) else {
         return  Err(format!("Couldn't get state of pokemon {}", source_nickname));
     };
     let pokemon_status = pokemon.condition.status.clone();
