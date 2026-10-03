@@ -170,6 +170,36 @@ fn record_move_luck_events(
         });
     }
 
+    if move_result.has_missed {
+        let score = ACCURACY_WEIGHT * (move_accuracy as f64 / 100.0); 
+        if score != 0.0 {       
+            luck_events.push(LuckEvent {
+                turn: current_turn,
+                pokemon: pokemon_display.clone(),
+                category: LuckCategory::Accuracy,
+                score: score,
+                description: format!("Missed move with accuracy {move_accuracy}"),
+                source_move: Some(move_name.to_string()),
+                is_beneficial: false,
+            })
+        }
+    }
+
+    if move_accuracy < 100.0 {
+        let score = ACCURACY_WEIGHT * (1.0 - move_accuracy as f64 / 100.0); 
+        if score != 0.0 {       
+            luck_events.push(LuckEvent {
+                turn: current_turn,
+                pokemon: pokemon_display.clone(),
+                category: LuckCategory::Accuracy,
+                score: score,
+                description: format!("Hit move with accuracy {move_accuracy}"),
+                source_move: Some(move_name.to_string()),
+                is_beneficial: true,
+            })
+        }
+    }
+
     for subline in sublines {
         match subline {
             SubLine::Crit { .. } => luck_events.push(LuckEvent {
@@ -180,15 +210,6 @@ fn record_move_luck_events(
                 description: "Critical hit!".to_string(),
                 source_move: Some(move_name.to_string()),
                 is_beneficial: true,
-            }),
-            SubLine::Miss { .. } => luck_events.push(LuckEvent {
-                turn: current_turn,
-                pokemon: pokemon_display.clone(),
-                category: LuckCategory::AccuracyMiss,
-                score: MISS_WEIGHT * (move_accuracy as f64 / 100.0),
-                description: format!("Missed move with accuracy {move_accuracy}"),
-                source_move: Some(move_name.to_string()),
-                is_beneficial: false,
             }),
             SubLine::Boost { .. } | SubLine::Unboost { .. } | SubLine::Status { .. }
                 if secondary_effect_chance > 0 && secondary_effect_chance < 100 =>
@@ -226,6 +247,31 @@ fn set_pending_flinch(state: &mut GameState, source_player: &str, move_name: &st
     }
 }
 
+
+fn apply_hp_changes(state: &mut GameState, sublines: &[SubLine]) {
+    for subline in sublines {
+        match subline {
+            #[allow(unused_variables)]
+            SubLine::Damage { target, hp, source } => {
+                // on fnt hp is "0 fnt" - but is parsed as 0/100
+                let target_state = state.get_pokemon_mut(target);
+                match target_state {
+                    Some(target_state) => { target_state.update_hp(hp); }
+                    None => { }
+                }
+            }
+            SubLine::Heal { target, hp } => {
+                let target_state = state.get_pokemon_mut(target);
+                match target_state {
+                    Some(target_state) => { target_state.update_hp(hp); }
+                    None => { }
+                }
+            }
+            _ => { }
+        }
+    }
+}
+
 pub fn process_move(
     state: &mut GameState,
     source_pokemon: &PokemonRef,
@@ -242,6 +288,8 @@ pub fn process_move(
         Ok(()) => {},
         Err(err) => { return Err(err) }
     };
+
+    apply_hp_changes(state, sublines);
     
     let move_peculiarities = apply_move_peculiarities(state, tag, sublines);
 

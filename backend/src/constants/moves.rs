@@ -42,7 +42,7 @@ fn resolve_boosts(
 impl Move {
     pub fn get_accuracy(&self) -> f64 {
         match &self.accuracy {
-            Some(acc) if acc == "∞" || acc == "999" => 999.0,
+            Some(acc) if acc == "∞" || acc == "999" || acc == "0" => 999.0,
             Some(acc) => acc.parse::<f64>().unwrap_or(100.0),
             None => 100.0,
         }

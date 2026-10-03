@@ -41,7 +41,7 @@ fn parse_line(line: &str) -> Line {
     let line_type = field(&mut fields);
 
     match line_type {
-        "switch" => {
+        "switch" | "drag" | "replace" => {
             let pokemon = parse_pokemon(field(&mut fields));
             match pokemon {
                 Some(source_pokemon) => Line::Main(MainLine {

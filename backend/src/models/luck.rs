@@ -3,7 +3,7 @@ use serde::Serialize;
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub enum LuckCategory {
     CriticalHit,
-    AccuracyMiss,
+    Accuracy,
     SecondaryEffect,
     Flinch,
     StatusTurn,

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use serde::Serialize;
 
-use crate::constants::poke_set_data::Species;
+use crate::{constants::poke_set_data::Species, models::lines::Hp};
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PokemonState {
@@ -23,8 +23,8 @@ pub struct Identity {
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct Condition {
-    pub current_hp: u8,
-    pub max_hp: u8,
+    pub current_hp: u16,
+    pub max_hp: u16,
     pub status: Option<Status>,
     pub status_turns: u32,
     pub is_fainted: bool,
@@ -129,6 +129,26 @@ impl PokemonState {
         self.condition.status = None;
         self.condition.status_turns = 0;
         Some(turns)
+    }
+
+    fn set_faint(&mut self) {
+        self.condition.is_fainted = true;
+        self.clear_pending_flinch();
+        self.condition.status = None;
+        self.condition.status_turns = 0;
+        self.condition.current_hp = 0;
+    }
+
+    pub fn update_hp(&mut self, new_hp: &Hp) {
+        match new_hp.current {
+            0 => {
+                self.set_faint();
+            }
+            other => {
+                self.condition.current_hp = other;
+                self.condition.max_hp = new_hp.max;
+            }
+        }
     }
 }
 

@@ -141,6 +141,6 @@ pub struct PokemonRef {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Hp {
-    pub current: u8,
-    pub max: u8,
+    pub current: u16,
+    pub max: u16,
 }
