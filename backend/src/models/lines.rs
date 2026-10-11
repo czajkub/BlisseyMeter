@@ -1,4 +1,4 @@
-use crate::models::{Status, Weather};
+use crate::models::{Status, Weather, field::FieldModifier};
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -46,6 +46,12 @@ pub enum MainLineKind {
     },
     WeatherChange {
         new_weather: Weather,
+    },
+    FieldStart {
+        field_modifier: Option<FieldModifier>,
+    },
+    FieldEnd {
+        field_modifier: Option<FieldModifier>
     },
 }
 

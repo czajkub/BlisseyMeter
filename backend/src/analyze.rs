@@ -1,9 +1,10 @@
 use regex::Regex;
 
+use crate::constants::moves::{Move, moves};
 use crate::models::lines::{
     Hp, InfoLine, Line, MainLine, MainLineKind, MoveTag, PlayerId, PokemonRef, SubLine,
 };
-use crate::models::{GameState, Weather};
+use crate::models::{FieldModifier, GameState, Weather};
 use crate::pokepaste_parser::parse_pokepastes;
 
 fn field<'a>(fields: &mut impl Iterator<Item = &'a str>) -> &'a str {
@@ -16,6 +17,11 @@ fn parse_pokemon(value: &str) -> Option<PokemonRef> {
         player: PlayerId::parse(player.trim())?,
         pokemon_nickname: nickname.trim().to_string(),
     })
+}
+
+fn parse_move(value: &str) -> Option<&Move> {
+    let (_, _move) = value.split_once(": ")?;
+    moves().get(_move)
 }
 
 fn parse_species(value: &str) -> String {
@@ -137,6 +143,19 @@ fn parse_line(line: &str) -> Line {
             },
             sublines: Vec::new(),
         }), 
+        "-fieldstart" => Line::Main(MainLine {
+            kind: MainLineKind::FieldStart { 
+                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields)))
+            },
+            sublines: Vec::new(),
+        }),
+        "-fieldend" => Line::Main(MainLine {
+            kind: MainLineKind::FieldEnd {
+                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields)))
+            },
+            sublines: Vec::new(),
+        },
+        ),
         "turn" => Line::Info(InfoLine::Turn {
             turn: field(&mut fields).parse().unwrap_or(0),
         }),

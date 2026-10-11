@@ -5,6 +5,7 @@ pub mod process_cant;
 pub mod process_curestatus;
 pub mod process_detailschange;
 pub mod process_faint;
+pub mod process_field_modifier;
 pub mod process_move;
 pub mod process_switch;
 
@@ -12,6 +13,7 @@ pub use process_cant::process_cant;
 pub use process_curestatus::process_curestatus;
 pub use process_detailschange::process_detailschange;
 pub use process_faint::process_faint;
+pub use process_field_modifier::process_field_modifier;
 pub use process_move::process_move;
 pub use process_switch::process_switch;
 
@@ -44,5 +46,11 @@ pub fn process_main_line(state: &mut GameState, line: &MainLine) -> Result<(), S
             ..
         } => process_curestatus(state, source_pokemon, cured_status.as_ref()),
         MainLineKind::WeatherChange { new_weather } => { state.field.set_new_weather(new_weather); Ok(()) }
+        MainLineKind::FieldStart { field_modifier } => {
+            process_field_modifier(state, field_modifier, true)
+        },
+        MainLineKind::FieldEnd { field_modifier } => {
+            process_field_modifier(state, field_modifier, false)
+        },
     }
 }

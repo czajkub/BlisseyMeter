@@ -1,4 +1,4 @@
-use crate::models::lines::PokemonRef;
+use crate::models::{lines::PokemonRef};
 
 use super::{FieldState, PlayerState, PokemonState};
 
@@ -66,4 +66,5 @@ impl GameState {
             .team
             .get_mut(&pokemon.pokemon_nickname)
     }
+
 }
