@@ -1,4 +1,4 @@
-use crate::models::{Status, Weather, field::FieldModifier};
+use crate::models::{SideCondition, Status, Weather, field::FieldModifier};
 
 #[derive(Debug, Clone)]
 pub enum Line {
@@ -92,6 +92,9 @@ pub enum SubLine {
     Resisted { target: PokemonRef },
     SuperEffective { target: PokemonRef },
     Immune { target: PokemonRef },
+    SideStart { player: PlayerRef, side_condition: SideCondition },
+    SideEnd { player: PlayerRef, side_condition: SideCondition },
+    // btw the from/of is [from] move: <Move> [of] PokemonRef
     EndItem { target: PokemonRef, item: String, from: Option<String>, of: Option<String> },
     Activate { target: PokemonRef, ability: String },
     Terastallize { target: PokemonRef, tera_type: String },
@@ -143,6 +146,12 @@ impl PlayerId {
 pub struct PokemonRef {
     pub player: PlayerId,
     pub pokemon_nickname: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct PlayerRef {
+    pub player: PlayerId,
+    pub nickname: String,
 }
 
 #[derive(Debug, Clone, Copy)]

@@ -1,7 +1,7 @@
 use crate::constants::flinch_chances::FLINCH_MOVES;
 use crate::constants::luck_weights::*;
 use crate::constants::moves::moves;
-use crate::line_processors::sub_processors::{process_boost, process_status};
+use crate::line_processors::sub_processors::{process_boost, process_side_conditions, process_status};
 use crate::models::lines::{MoveTag, PokemonRef, SubLine};
 use crate::models::{GameState, LuckCategory, LuckEvent, Status};
 
@@ -71,7 +71,7 @@ impl MovePeculiarities {
     }
 }
 
-fn apply_move_peculiarities(state: &mut GameState, tag: &Option<MoveTag>, sublines: &[SubLine]) -> MovePeculiarities {
+fn process_sublines(state: &mut GameState, tag: &Option<MoveTag>, sublines: &[SubLine]) -> MovePeculiarities {
     let mut peculiarities = MovePeculiarities::default();
 
     for subline in sublines {
@@ -96,6 +96,12 @@ fn apply_move_peculiarities(state: &mut GameState, tag: &Option<MoveTag>, sublin
             SubLine::Status { target, status, .. } => {
                 peculiarities.has_secondary_sublines = true;
                 process_status(state, target, status.as_ref());
+            }
+            SubLine::SideStart { player, side_condition } => {
+                process_side_conditions(state, player, side_condition, true);
+            }
+            SubLine::SideEnd { player, side_condition } => {
+                process_side_conditions(state, player, side_condition, false);
             }
             _ => {}
         }
@@ -291,7 +297,7 @@ pub fn process_move(
 
     apply_hp_changes(state, sublines);
     
-    let move_peculiarities = apply_move_peculiarities(state, tag, sublines);
+    let move_peculiarities = process_sublines(state, tag, sublines);
 
     match record_move_luck_events(
         state,

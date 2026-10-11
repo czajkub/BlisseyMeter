@@ -6,7 +6,7 @@ mod luck;
 mod player;
 mod pokemon;
 
-pub use field::{FieldModifier, FieldModifiers, FieldState, Weather, Terrain, SideConditions};
+pub use field::{FieldModifier, FieldModifiers, FieldState, Weather, Terrain, SideCondition, SideConditions};
 pub use game::GameState;
 pub use luck::{LuckCategory, LuckEvent};
 pub use player::PlayerState;

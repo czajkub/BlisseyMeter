@@ -1,4 +1,5 @@
 use crate::constants::moves::Move;
+use crate::models::lines::PlayerId;
 
 #[derive(Debug, Clone, Default)]
 pub struct FieldState {
@@ -11,6 +12,14 @@ pub struct FieldState {
 impl FieldState {
     pub fn set_new_weather(&mut self, new_weather: &Weather) {
         self.weather = Some(*new_weather);
+    }
+
+    pub fn update_side_condition(&mut self, player: PlayerId, condition: &SideCondition, start: bool) {
+        let side = match player {
+            PlayerId::P1 => &mut self.p1_side,
+            PlayerId::P2 => &mut self.p2_side,
+        };
+        side.apply(condition, start);
     }
 
     pub fn update_field_modifier(&mut self, field_modifier: &FieldModifier, start: bool) {
@@ -109,6 +118,34 @@ pub enum Terrain {
     Misty,
 }
 
+#[derive(Debug, Clone)]
+pub enum SideCondition {
+    StealthRock,
+    Spikes,
+    ToxicSpikes,
+    StickyWeb,
+    Reflect,
+    LightScreen,
+    AuroraVeil,
+    Tailwind,
+}
+
+impl SideCondition {
+    pub fn from_move(_move: Option<&Move>) -> Option<Self> {
+        match _move?.name.as_str() {
+            "Stealth Rock" => { return Some(SideCondition::StealthRock) }
+            "Spikes" => { return Some(SideCondition::Spikes) }
+            "Toxic Spikes" => { return Some(SideCondition::ToxicSpikes) }
+            "Sticky Web" => { return Some(SideCondition::StickyWeb) }
+            "Reflect" => { return Some(SideCondition::Reflect) }
+            "Light Screen" => { return Some(SideCondition::LightScreen) }
+            "Aurora Veil" => { return Some(SideCondition::AuroraVeil) }
+            "Tailwind" => { return Some(SideCondition::Tailwind) }
+            _ => { return None }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct SideConditions {
     pub stealth_rock: bool,
@@ -119,4 +156,30 @@ pub struct SideConditions {
     pub light_screen: bool,
     pub aurora_veil: bool,
     pub tailwind: bool,
+}
+
+impl SideConditions {
+    pub fn apply(&mut self, condition: &SideCondition, start: bool) {
+        match condition {
+            SideCondition::Spikes => {
+                match start {
+                    true => self.spikes = (self.spikes+1).clamp(0, 3),
+                    false => self.spikes = 0
+                }
+            }
+            SideCondition::ToxicSpikes => {
+                match start {
+                    true => self.toxic_spikes = (self.toxic_spikes+1).clamp(0, 2),
+                    false => self.toxic_spikes = 0
+                }
+            }
+            SideCondition::StealthRock => self.stealth_rock = start,
+            SideCondition::StickyWeb => self.sticky_web = start,
+            SideCondition::Reflect => self.reflect = start,
+            SideCondition::LightScreen => self.light_screen = start,
+            SideCondition::AuroraVeil => self.aurora_veil = start,
+            SideCondition::Tailwind => self.tailwind = start,
+        }
+        
+    }
 }

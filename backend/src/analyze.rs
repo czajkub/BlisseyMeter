@@ -2,9 +2,9 @@ use regex::Regex;
 
 use crate::constants::moves::{Move, moves};
 use crate::models::lines::{
-    Hp, InfoLine, Line, MainLine, MainLineKind, MoveTag, PlayerId, PokemonRef, SubLine,
+    Hp, InfoLine, Line, MainLine, MainLineKind, MoveTag, PlayerId, PlayerRef, PokemonRef, SubLine,
 };
-use crate::models::{FieldModifier, GameState, Weather};
+use crate::models::{FieldModifier, GameState, SideCondition, Weather};
 use crate::pokepaste_parser::parse_pokepastes;
 
 fn field<'a>(fields: &mut impl Iterator<Item = &'a str>) -> &'a str {
@@ -19,9 +19,21 @@ fn parse_pokemon(value: &str) -> Option<PokemonRef> {
     })
 }
 
-fn parse_move(value: &str) -> Option<&Move> {
+fn parse_player(value: &str) -> Option<PlayerRef> {
+    let (player, nickname) = value.split_once(':')?;
+    Some(PlayerRef {
+        player: PlayerId::parse(player.trim())?,
+        nickname: nickname.trim().to_string(),
+    })
+}
+
+fn parse_move(value: &str, opt: bool) -> Option<&Move> {
+    let _moves = moves();
+    if opt && !value.starts_with("move: ") {
+        return _moves.get(value)
+    }
     let (_, _move) = value.split_once(": ")?;
-    moves().get(_move)
+    _moves.get(_move)
 }
 
 fn parse_species(value: &str) -> String {
@@ -145,13 +157,13 @@ fn parse_line(line: &str) -> Line {
         }), 
         "-fieldstart" => Line::Main(MainLine {
             kind: MainLineKind::FieldStart { 
-                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields)))
+                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields), false))
             },
             sublines: Vec::new(),
         }),
         "-fieldend" => Line::Main(MainLine {
             kind: MainLineKind::FieldEnd {
-                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields)))
+                field_modifier: FieldModifier::from_move(parse_move(field(&mut fields), false))
             },
             sublines: Vec::new(),
         },
@@ -257,6 +269,32 @@ fn parse_line(line: &str) -> Line {
                 Line::Sub(subline)
             })
             .unwrap_or(Line::Unknown),
+        "-sidestart" => {
+            let player_ref = parse_player(field(&mut fields));
+            let side_condition = SideCondition::from_move(parse_move(field(&mut fields), true));
+
+            if let (Some(player_ref), Some(side_condition)) = (player_ref, side_condition) {
+                Line::Sub(SubLine::SideStart {
+                    player: player_ref,
+                    side_condition,
+                })
+            } else {
+                Line::Unknown
+            }
+        }
+        "-sideend" => {
+            let player_ref = parse_player(field(&mut fields));
+            let side_condition = SideCondition::from_move(parse_move(field(&mut fields), true));
+
+            if let (Some(player_ref), Some(side_condition)) = (player_ref, side_condition) {
+                Line::Sub(SubLine::SideEnd {
+                    player: player_ref,
+                    side_condition,
+                })
+            } else {
+                Line::Unknown
+            }
+        }
         "-enditem" => parse_pokemon(field(&mut fields))
             .map(|target| {
                 Line::Sub(SubLine::EndItem {
